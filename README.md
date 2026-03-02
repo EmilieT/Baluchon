@@ -37,33 +37,13 @@ It is designed for bioinformatics projects.
    ```
 3. Install the dependencies:
    ```bash
-   pip install-r requirements.txt
+   pip install -r requirements.txt
    ```
-4. Create your environment variables:
+4. Create your environment variables (.env file)
    ```bash
    SECRET_KEY=ta_cle_secrete_ici
    DATABASE_URI=sqlite:///baluchon.db
    ```
 
-## Project Structure
-
-baluchon/
-├── app.py                  # Point d'entrée de l'application
-
-├── config.py               # Configuration de l'application
-
-├── models.py               # Modèles de la base de données
-
-├── requirements.txt        # Dépendances Python
-
-├── static/                 # Fichiers statiques (CSS, JS, images)
-
-├── templates/              # Templates HTML
-
-├── migrations/             # Migrations de la base de données
-
-├── scripts/                # Scripts utilitaires
-
-└── README.md               # Ce fichier
 
 
