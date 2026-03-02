@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier un événement{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Modifier un événement</h1>
+
+    <form method="POST" action="{{ url_for('modifier_evenement', evenement_id=evenement.id) }}">
+        <!-- Champs principaux de l'événement -->
+        <div class="mb-3">
+            <label for="type" class="form-label">Type d'événement</label>
+            <select class="form-select" id="type" name="type" required>
+                <option value="réunion" {% if evenement.type == 'réunion' %}selected{% endif %}>Réunion</option>
+                <option value="message" {% if evenement.type == 'message' %}selected{% endif %}>Message</option>
+                <option value="note" {% if evenement.type == 'note' %}selected{% endif %}>Note</option>
+                <option value="réception" {% if evenement.type == 'réception' %}selected{% endif %}>Réception de données</option>
+                <option value="envoi" {% if evenement.type == 'envoi' %}selected{% endif %}>Envoi de données</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="date" class="form-label">Date et heure</label>
+            <input type="datetime-local" class="form-control" id="date" name="date" value="{{ evenement.date.strftime('%Y-%m-%dT%H:%M') }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="contenu" class="form-label">Contenu</label>
+            <textarea class="form-control" id="contenu" name="contenu" rows="4" required>{{ evenement.contenu }}</textarea>
+        </div>
+
+        <!-- Liste des fichiers existants (sans gestion) -->
+        {% if evenement.fichiers %}
+        <div class="mb-3">
+            <label class="form-label">Fichiers associés</label>
+            <div class="list-group">
+                {% for fichier in evenement.fichiers %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-file-earmark me-2"></i>
+                        {{ fichier.nom }}
+                    </div>
+                    <div>
+                        <a href="{{ url_for('gerer_fichiers', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
+                            Gérer les fichiers
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="mb-3">
+            <a href="{{ url_for('gerer_fichiers', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
+                Ajouter des fichiers
+            </a>
+        </div>
+        {% endif %}
+        <!-- Section pour ajouter/modifier des tâches -->
+        <div class="mb-3">
+            <label class="form-label">Tâches associées</label>
+            <div id="taches-container">
+                {% for tache in evenement.taches %}
+                <div class="tache-input mb-2 d-flex align-items-center">
+                    <input type="hidden" name="tache_ids[]" value="{{ tache.id }}">
+                    <input type="text" class="form-control me-2 flex-grow-1" name="taches[]" value="{{ tache.description }}" placeholder="Description de la tâche" required>
+                    <input type="date" class="form-control me-2" name="date_limite[]" value="{% if tache.date_limite %}{{ tache.date_limite.strftime('%Y-%m-%d') }}{% endif %}" placeholder="Date limite">
+                    <select class="form-select me-2" name="statuts[]">
+                        <option value="à faire" {% if tache.statut == 'à faire' %}selected{% endif %}>À faire</option>
+                        <option value="en cours" {% if tache.statut == 'en cours' %}selected{% endif %}>En cours</option>
+                        <option value="terminé" {% if tache.statut == 'terminé' %}selected{% endif %}>Terminé</option>
+                    </select>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="ajouter-tache" class="btn btn-sm btn-outline-secondary mt-2">+ Ajouter une tâche</button>
+        </div>
+
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-secondary">Annuler</a>
+            <button type="submit" class="btn btn-sm btn-primary">Enregistrer les modifications</button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

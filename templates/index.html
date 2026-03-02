@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des projets{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Liste des projets</h2>
+            <a href="{{ url_for('ajouter_projet') }}" class="btn btn-primary btn-custom">Ajouter un projet</a>
+        </div>
+        {% if projets %}
+        <div class="list-group">
+            {% for projet in projets %}
+            <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="list-group-item list-group-item-action projet-card">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ projet.nom }}</h5>
+                </div>
+                <p class="mb-1">{{ projet.description }}</p>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">Aucun projet trouvé. Commencez par en ajouter un !</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

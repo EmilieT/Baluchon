@@ -1,0 +1,11 @@
+{# templates/macros.html #}
+{% macro type_badge(type) %}
+    {% set type_colors = {
+        'note': 'badge bg-primary',
+        'communication': 'badge bg-info',
+        'envoye': 'badge bg-success',
+        'recu': 'badge bg-warning text-dark',
+        'reunion': 'badge bg-secondary'
+    } %}
+    <span class="{{ type_colors.get(type, 'badge bg-secondary') }}">{{ type }}</span>
+{% endmacro %}

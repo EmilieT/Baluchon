@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Tous les fichiers - {{ projet.nom }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Tous les fichiers du projet : {{ projet.nom }}</h1>
+        <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn btn-secondary">Retour au tableau de bord</a>
+    </div>
+
+    <!-- Liste des fichiers -->
+    <div class="list-group">
+        {% if tous_les_fichiers %}
+        {% for fichier in tous_les_fichiers %}
+        <div class="list-group-item p-3">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-file-earmark me-2"></i>
+                        <strong>{{ fichier.nom }}</strong>
+                    </div>
+                    <div class="text-muted small mb-2">
+                        Taille : {{ fichier.taille|filesizeformat }} |
+                        Uploadé le : {{ fichier.date_upload.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                    {% if fichier.evenement %}
+                    <div>
+                        <a href="{{ url_for('evenement_detail', evenement_id=fichier.evenement.id) }}" class="text-decoration-none fw-bold">
+                            Événement : {{ fichier.evenement.type }} ({{ fichier.evenement.date.strftime('%d/%m/%Y') }})
+                        </a>
+                        <button class="btn btn-sm btn-link p-0 ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#event-{{ fichier.id }}" aria-expanded="false">
+                            <i class="bi bi-chevron-down"></i> Voir la description
+                        </button>
+                        <div class="collapse mt-2" id="event-{{ fichier.id }}">
+                            <div class="card card-body p-2 small bg-light border">
+                                {{ fichier.evenement.contenu }}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-muted small">Événement : Non associé</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 d-flex justify-content-end align-items-center">
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('servir_fichier', fichier_id=fichier.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                            Voir
+                        </a>
+                        <a href="{{ url_for('servir_fichier', fichier_id=fichier.id, action='telecharger') }}" class="btn btn-sm btn-outline-secondary">
+                            Télécharger
+                        </a>
+                        <form action="{{ url_for('supprimer_fichier', fichier_id=fichier.id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="alert alert-info">
+            Aucun fichier trouvé pour ce projet.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

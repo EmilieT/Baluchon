@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Rapports HTML - {{ projet.nom }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Rapports HTML - {{ projet.nom }}</h1>
+        <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn btn-secondary">Retour au tableau de bord</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5>Rapports HTML</h5>
+        </div>
+        <div class="card-body">
+            {% if fichiers_html %}
+            <ul class="list-group list-group-flush">
+                {% for fichier, chemin_relatif, date in fichiers_html %}
+                <li class="list-group-item">
+                    <a href="{{ url_for('fichier', projet_id=projet.id, filename=chemin_relatif) }}" target="_blank" class="text-decoration-none">
+                        {{ chemin_relatif }}
+                    </a>
+                    <span class="badge bg-primary rounded-pill float-end">{{ date|date }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">Aucun rapport HTML trouvé.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

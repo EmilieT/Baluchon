@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Projet - {{ projet.nom }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">{{ projet.nom }}</h2>
+            <p class="text-muted mb-0">{{ projet.description }}</p>
+        </div>
+        <a href="{{ url_for('editer_projet', projet_id=projet.id) }}" class="btn btn-outline-secondary">Éditer</a>
+    </div>
+
+    <!-- Fichiers locaux -->
+    <div class="card mb-5">
+        <div class="card-header border-bottom border-primary border-opacity-25">
+            <h5 class="mb-0 text-primary">
+                <i class="bi bi-laptop me-2"></i>Fichiers locaux
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 border rounded">
+                        <h6 class="mb-2">Dossier</h6>
+                        <small class="text-muted d-block mb-2">{{ projet.chemin_rproj|dirname }}</small>
+                        <a href="{{ url_for('ouvrir_dossier', projet_id=projet.id) }}" class="btn btn-sm btn-outline-primary">Ouvrir</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 border rounded">
+                        <h6 class="mb-2">Fichier RStudio</h6>
+                        <small class="text-muted d-block mb-2">{{ projet.chemin_rproj|basename }}</small>
+                        <a href="{{ url_for('ouvrir_projet', projet_id=projet.id) }}" class="btn btn-sm btn-outline-primary">Ouvrir</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liens vers rapports et dépendances -->
+            <div class="mt-4 d-flex gap-3">
+                <a href="{{ url_for('rapports_html', projet_id=projet.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-file-earmark-code me-1"></i> Rapports HTML
+                </a>
+                <a href="{{ url_for('lister_dependances_par_fichier_route', projet_id=projet.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-diagram-3 me-1"></i> Dépendances
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suivi du projet -->
+    <div class="card">
+        <div class="card-header border-bottom border-success border-opacity-25">
+            <h5 class="mb-0 text-success">
+                <i class="bi bi-kanban me-2"></i>Suivi du projet
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Tâches -->
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Tâches</h6>
+                        <!-- Bouton pour ouvrir le formulaire d'ajout -->
+                        <button class="btn btn-sm btn-outline-success" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#ajoutTacheForm"
+                                aria-expanded="false" aria-controls="ajoutTacheForm">
+                            <i class="bi bi-plus-circle me-1"></i> Ajouter
+                        </button>
+                    </div>
+
+                    <!-- Formulaire d'ajout de tâche (masqué par défaut) -->
+                    <div class="collapse mb-3" id="ajoutTacheForm">
+                        <div class="card card-body">
+                            <form method="POST" action="{{ url_for('ajouter_tache', projet_id=projet.id) }}" class="row g-2">
+                                <div class="col-8">
+                                    <input type="text" class="form-control form-control-sm" name="description"
+                                           placeholder="Description de la tâche" required>
+                                </div>
+                                <div class="col-3">
+                                    <input type="date" class="form-control form-control-sm" name="date_limite"
+                                           placeholder="Date limite">
+                                </div>
+                                <div class="col-1 d-grid">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                </div>
+                                <!-- Champ caché pour indiquer qu'il n'y a pas d'événement associé -->
+                                <input type="hidden" name="evenement_id" value="">
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if taches_non_terminees %}
+                    <div class="list-group">
+                        {% for tache in taches_non_terminees %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {{ tache.description }}
+                                    {% if tache.date_limite %}
+                                    <span class="badge bg-light text-dark ms-2">
+                                        <i class="bi bi-calendar me-1"></i>{{ tache.date_limite.strftime('%d/%m') }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <form action="{{ url_for('changer_statut', tache_id=tache.id) }}" method="POST" class="me-2">
+                                    <select name="statut" class="form-select form-select-sm
+                                        {% if tache.statut == 'en cours' %}bg-warning text-dark
+                                        {% elif tache.statut == 'en attente' %}bg-info text-dark
+                                        {% elif tache.statut == 'à faire' %}bg-secondary text-white
+                                        {% else %}bg-success text-white
+                                        {% endif %}"
+                                        onchange="this.form.submit()">
+                                        <option value="à faire" {% if tache.statut == 'à faire' %}selected{% endif %}>À faire</option>
+                                        <option value="en cours" {% if tache.statut == 'en cours' %}selected{% endif %}>En cours</option>
+                                        <option value="en attente" {% if tache.statut == 'en attente' %}selected{% endif %}>En attente</option>
+                                        <option value="terminé" {% if tache.statut == 'terminé' %}selected{% endif %}>Terminé</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Aucune tâche en cours</p>
+                    {% endif %}
+                    <div class="mt-3 text-end">
+                        <a href="{{ url_for('toutes_les_taches', projet_id=projet.id) }}" class="btn btn-sm btn-outline-secondary">Toutes les tâches</a>
+                    </div>
+                </div>
+
+                <!-- Événements -->
+                <div class="col-md-6">
+                    <h6 class="mb-3">Événements à venir</h6>
+                    {% if evenements_a_venir %}
+                    <div class="list-group">
+                        {% for evenement in evenements_a_venir %}
+                        <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}" class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ evenement.type|capitalize }}</strong>
+                                    <span class="badge bg-light text-dark ms-2">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        {{ evenement.date.strftime('%d/%m %H:%M') }}
+                                    </span>
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ evenement.contenu|truncate(100) }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Aucun événement à venir</p>
+                    {% endif %}
+                    <div class="mt-3 text-end">
+                        <a href="{{ url_for('evenements', projet_id=projet.id) }}" class="btn btn-sm btn-outline-secondary">Tous les événements</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fichiers associés -->
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-success">Fichiers associés</h6>
+                    <a href="{{ url_for('tous_les_fichiers', projet_id=projet.id) }}" class="btn btn-sm btn-outline-success">
+                        Voir les fichiers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

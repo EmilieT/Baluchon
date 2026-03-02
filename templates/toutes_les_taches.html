@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Toutes les tâches - {{ projet.nom }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Toutes les tâches du projet : {{ projet.nom }}</h1>
+        <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn btn-secondary">Retour au tableau de bord</a>
+    </div>
+
+    <!-- Formulaire pour ajouter une tâche -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Ajouter une tâche</h5>
+        <form method="POST" action="{{ url_for('ajouter_tache', projet_id=projet.id) }}" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" name="description" placeholder="Description de la tâche" required>
+                <input type="date" class="form-control" name="date_limite" placeholder="Date limite">
+                <button type="submit" class="btn btn-primary">Ajouter</button>
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <!-- Liste des tâches -->
+    <div class="list-group">
+        {% if toutes_les_taches %}
+            {% for tache in toutes_les_taches %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ tache.description }}</strong>
+                                </div>
+                            </div>
+                            <div class="text-muted small">
+                                Créée le : {{ tache.date_creation.strftime('%d/%m/%Y %H:%M') }}
+
+                                {% if tache.statut == 'terminé' and tache.date_cloture %}
+                                    <span class="badge bg-success ms-2">Terminé depuis : {{ tache.date_cloture.strftime('%d/%m/%Y %H:%M') }}</span>
+                                {% elif tache.date_limite %}
+                                    <span class="badge bg-warning text-dark ms-2">À faire pour : {{ tache.date_limite.strftime('%d/%m/%Y') }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <!-- Menu déroulant pour changer le statut -->
+                            <form action="{{ url_for('changer_statut', tache_id=tache.id) }}" method="POST" class="me-2">
+                                <select name="statut" class="form-select form-select-sm
+                                    {% if tache.statut == 'en cours' %}bg-warning text-dark
+                                    {% elif tache.statut == 'en attente' %}bg-info text-dark
+                                    {% elif tache.statut == 'à faire' %}bg-secondary text-white
+                                    {% else %}bg-success text-white
+                                    {% endif %}"
+                                    onchange="this.form.submit()">
+                                    <option value="à faire" {% if tache.statut == 'à faire' %}selected{% endif %}>À faire</option>
+                                    <option value="en cours" {% if tache.statut == 'en cours' %}selected{% endif %}>En cours</option>
+                                    <option value="en attente" {% if tache.statut == 'en attente' %}selected{% endif %}>En attente</option>
+                                    <option value="terminé" {% if tache.statut == 'terminé' %}selected{% endif %}>Terminé</option>
+                                </select>
+                            </form>
+
+                            <!-- Bouton Éditer -->
+                            <a href="{{ url_for('editer_tache', tache_id=tache.id) }}" class="btn btn-sm btn-outline-primary">Éditer</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">Aucune tâche trouvée.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

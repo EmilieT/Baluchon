@@ -1,0 +1,26 @@
+# Environnements virtuels
+.venv/
+venv/
+
+# Base de données et fichiers sensibles
+instance/
+baluchon.db
+.env
+uploads/
+migrations/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Fichiers macOS
+.DS_Store
+
+# Fichiers logs et temporaires
+*.log
+*.swp
+
+# Fichiers temporaires d'éditeurs
+*~
+

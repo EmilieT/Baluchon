@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Gérer les fichiers{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Gérer les fichiers de l'événement</h1>
+
+    <div class="mb-4">
+        <a href="{{ url_for('modifier_evenement', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-secondary">
+            ← Retour à l'événement
+        </a>
+    </div>
+
+    <!-- Formulaire pour uploader des fichiers -->
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('ajouter_fichiers', evenement_id=evenement.id) }}" class="mb-4">
+        <div class="mb-3">
+            <label class="form-label">Ajouter des fichiers</label>
+            <input type="file" class="form-control" name="fichiers" multiple required>
+        </div>
+        <button type="submit" class="btn btn-primary">Uploader les fichiers</button>
+    </form>
+
+    <!-- Liste des fichiers existants -->
+    {% if evenement.fichiers %}
+    <div class="mb-3">
+        <label class="form-label">Fichiers existants</label>
+        <div class="list-group">
+            {% for fichier in evenement.fichiers %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-file-earmark me-2"></i>
+                    {{ fichier.nom }}
+                    <small class="text-muted ms-2">({{ fichier.taille|filesizeformat }})</small>
+                </div>
+                <div>
+                    <!-- Utilisation de la route servir_fichier avec action pour télécharger -->
+                    <a href="{{ url_for('servir_fichier', fichier_id=fichier.id) }}" class="btn btn-sm btn-outline-primary me-1" target="_blank">
+                        Ouvrir
+                    </a>
+                    <a href="{{ url_for('servir_fichier', fichier_id=fichier.id, action='telecharger') }}" class="btn btn-sm btn-outline-secondary me-1">
+                        Télécharger
+                    </a>
+                    <form method="POST" action="{{ url_for('supprimer_fichier', fichier_id=fichier.id) }}" style="display: inline;" onsubmit="return confirm('Supprimer ce fichier ?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Aucun fichier associé à cet événement.</div>
+    {% endif %}
+</div>
+{% endblock %}

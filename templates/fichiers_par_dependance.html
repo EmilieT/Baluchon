@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Fichiers par dépendance - {{ projet.nom }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <h2 class="mb-4">Fichiers par dépendance pour le projet {{ projet.nom }}</h2>
+
+        {% if dependances_et_fichiers %}
+            <div class="accordion" id="fichiersParDependanceAccordion">
+                {% for dep, fichiers in dependances_et_fichiers.items() %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingDep{{ loop.index }}">
+                        <button class="accordion-button {% if not loop.first %}collapsed{% endif %}"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapseDep{{ loop.index }}"
+                                aria-expanded="{% if loop.first %}true{% else %}false{% endif %}"
+                                aria-controls="collapseDep{{ loop.index }}">
+                            {{ dep }}
+                        </button>
+                    </h2>
+                    <div id="collapseDep{{ loop.index }}"
+                         class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
+                         aria-labelledby="headingDep{{ loop.index }}"
+                         data-bs-parent="#fichiersParDependanceAccordion">
+                        <div class="accordion-body">
+                            <ul class="list-group">
+                                {% for fichier in fichiers %}
+                                    <li class="list-group-item">{{ fichier }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Aucune dépendance trouvée.</p>
+        {% endif %}
+
+        <div class="mt-3">
+            <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn btn-secondary">Retour au projet</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

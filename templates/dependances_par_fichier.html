@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Dépendances par fichier - {{ projet.nom }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <h2 class="mb-4">Dépendances par fichier pour le projet {{ projet.nom }}</h2>
+
+        {% if fichiers_et_dependances %}
+            <div class="accordion" id="dependancesParFichierAccordion">
+                {% for fichier, deps in fichiers_et_dependances.items() %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading{{ loop.index }}">
+                        <button class="accordion-button {% if not loop.first %}collapsed{% endif %}"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapse{{ loop.index }}"
+                                aria-expanded="{% if loop.first %}true{% else %}false{% endif %}"
+                                aria-controls="collapse{{ loop.index }}">
+                            {{ fichier }}
+                        </button>
+                    </h2>
+                    <div id="collapse{{ loop.index }}"
+                         class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
+                         aria-labelledby="heading{{ loop.index }}"
+                         data-bs-parent="#dependancesParFichierAccordion">
+                        <div class="accordion-body">
+                            {% if deps %}
+                                <ul class="list-group">
+                                    {% for dep in deps %}
+                                        <li class="list-group-item">{{ dep }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>Aucune dépendance trouvée.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Aucun fichier avec des dépendances trouvé.</p>
+        {% endif %}
+
+        <div class="mt-3">
+            <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn btn-secondary">Retour au projet</a>
+            <a href="{{ url_for('lister_fichiers_par_dependance_route', projet_id=projet.id) }}" class="btn btn-primary">Voir les fichiers par dépendance</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

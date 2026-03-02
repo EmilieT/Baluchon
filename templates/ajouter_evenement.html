@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Ajouter un événement{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Ajouter un événement pour {{ projet.nom }}</h1>
+
+    <form method="POST" action="{{ url_for('ajouter_evenement', projet_id=projet.id) }}">
+        <!-- Champs principaux de l'événement -->
+        <div class="mb-3">
+            <label for="type" class="form-label">Type d'événement</label>
+            <select class="form-select" id="type" name="type" required>
+                <option value="réunion">Réunion</option>
+                <option value="message">Message</option>
+                <option value="note">Note</option>
+                <option value="réception">Réception de données</option>
+                <option value="envoi">Envoi de données</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="date" class="form-label">Date et heure</label>
+            <input type="datetime-local" class="form-control" id="date" name="date"
+                   value="{{ datetime.now().strftime('%Y-%m-%dT%H:%M') }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="contenu" class="form-label">Contenu</label>
+            <textarea class="form-control" id="contenu" name="contenu" rows="4" required></textarea>
+        </div>
+
+        <!-- Section pour ajouter des tâches -->
+        <div class="mb-3">
+            <label class="form-label">Tâches associées</label>
+            <div id="taches-container">
+                <!-- Une ligne vide par défaut pour ajouter une tâche -->
+                <div class="tache-input mb-2 d-flex align-items-center">
+                    <input type="hidden" name="tache_ids[]" value="">
+                    <input type="text" class="form-control me-2 flex-grow-1" name="taches[]" placeholder="Description de la tâche">
+                    <input type="date" class="form-control me-2" name="date_limite[]" placeholder="Date limite">
+                    <select class="form-select me-2" name="statuts[]">
+                        <option value="à faire" selected>À faire</option>
+                        <option value="en cours">En cours</option>
+                        <option value="terminé">Terminé</option>
+                    </select>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
+                </div>
+            </div>
+            <button type="button" id="ajouter-tache" class="btn btn-sm btn-outline-secondary mt-2">+ Ajouter une tâche</button>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+            <button type="submit" name="action" value="ajouter_evenement" class="btn btn-sm btn-primary me-2">Ajouter événement</button>
+            <button type="submit" name="action" value="ajouter_fichiers" class="btn btn-sm btn-outline-primary">Enregistrer et ajouter des fichiers</button>
+        </div>
+    </form>
+</div>
+
+<!-- Script pour gérer l'ajout/suppression dynamique des tâches -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('taches-container');
+
+        // Ajouter une tâche
+        document.getElementById('ajouter-tache').addEventListener('click', function() {
+            const newTacheDiv = document.createElement('div');
+            newTacheDiv.className = 'tache-input mb-2 d-flex align-items-center';
+            newTacheDiv.innerHTML = `
+                <input type="hidden" name="tache_ids[]" value="">
+                <input type="text" class="form-control me-2 flex-grow-1" name="taches[]" placeholder="Description de la tâche">
+                <input type="date" class="form-control me-2" name="date_limite[]" placeholder="Date limite">
+                <select class="form-select me-2" name="statuts[]">
+                    <option value="à faire" selected>À faire</option>
+                    <option value="en cours">En cours</option>
+                    <option value="terminé">Terminé</option>
+                </select>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
+            `;
+            container.appendChild(newTacheDiv);
+        });
+
+        // Supprimer une tâche
+        container.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-tache') || e.target.closest('.remove-tache')) {
+                const tacheDiv = e.target.closest('.tache-input');
+                if (tacheDiv) {
+                    tacheDiv.remove();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Éditer une tâche{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Éditer une tâche</h1>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Informations de la tâche</h5>
+            <div>
+                <a href="{{ url_for('toutes_les_taches', projet_id=tache.projet_id) }}" class="btn btn-secondary btn-sm me-2">Retour</a>
+                <form action="{{ url_for('supprimer_tache', tache_id=tache.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?');">
+                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <small class="text-muted"><strong>ID :</strong></small>
+                        <div>
+                            <span class="form-control-plaintext">{{ tache.id }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted"><strong>Projet :</strong></small>
+                        <div>
+                            <span class="form-control-plaintext">{{ tache.projet.nom }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted"><strong>Statut :</strong></small>
+                        <div>
+                            <span class="form-control-plaintext">{{ tache.statut }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <small class="text-muted"><strong>Dates :</strong></small>
+                        <div>
+                            <p class="mb-1 small">Créée le : {{ tache.date_creation.strftime('%d/%m/%Y %H:%M') }}</p>
+                            {% if tache.date_limite %}
+                            <p class="mb-1 small">À faire pour : {{ tache.date_limite.strftime('%d/%m/%Y') }}</p>
+                            {% endif %}
+                            {% if tache.date_cloture %}
+                            <p class="mb-1 small">Terminée le : {{ tache.date_cloture.strftime('%d/%m/%Y %H:%M') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5>Modifier la tâche</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('editer_tache', tache_id=tache.id) }}">
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required>{{ tache.description }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="date_limite" class="form-label">Date limite</label>
+                    <input type="date" class="form-control" id="date_limite" name="date_limite"
+                           value="{% if tache.date_limite %}{{ tache.date_limite.strftime('%Y-%m-%d') }}{% endif %}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select class="form-select" id="statut" name="statut">
+                        <option value="à faire" {% if tache.statut == 'à faire' %}selected{% endif %}>À faire</option>
+                        <option value="en cours" {% if tache.statut == 'en cours' %}selected{% endif %}>En cours</option>
+                        <option value="en attente" {% if tache.statut == 'en attente' %}selected{% endif %}>En attente</option>
+                        <option value="terminé" {% if tache.statut == 'terminé' %}selected{% endif %}>Terminé</option>
+                    </select>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6>Événement associé</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if tache.evenement %}
+                            <div>
+                                <strong>{{ tache.evenement.type }}</strong> - {{ tache.evenement.date.strftime('%d/%m/%Y %H:%M') }}
+                            </div>
+                            <div class="text-muted small">
+                                {{ tache.evenement.contenu }}
+                            </div>
+                            <div class="mt-2">
+                                <a href="{{ url_for('evenement_detail', evenement_id=tache.evenement.id) }}" class="btn btn-sm btn-outline-primary">Voir l'événement</a>
+                            </div>
+                        {% else %}
+                            <p class="text-muted small">Aucun événement associé.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

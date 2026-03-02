@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Ajouter un projet{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h2 class="mb-4">Ajouter un projet</h2>
+        <form method="POST" class="bg-white p-4 rounded shadow-sm">
+            <div class="mb-3">
+                <label for="nom" class="form-label">Nom du projet</label>
+                <input type="text" class="form-control" id="nom" name="nom" required>
+            </div>
+            <div class="mb-3">
+                <label for="chemin_rproj" class="form-label">Chemin vers le fichier Projet</label>
+                <input type="text" class="form-control" id="chemin_rproj" name="chemin_rproj" placeholder="/chemin/vers/votre_projet.Rproj" required>
+            <small class="form-text text-muted">
+                    "Copier en tant que chemin"
+                </small>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Ajouter le projet</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
