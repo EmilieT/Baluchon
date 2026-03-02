@@ -44,6 +44,13 @@ It is designed for bioinformatics projects.
    SECRET_KEY=ta_cle_secrete_ici
    DATABASE_URI=sqlite:///baluchon.db
    ```
+5. Initiate your database
+  ```bash
+  mkdir -p instance
+  flask db init
+  flask db migrate -m "Initial migration"
+  flask db upgrade
+   ```   
 
 
 
