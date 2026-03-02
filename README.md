@@ -49,13 +49,21 @@ It is designed for bioinformatics projects.
 
 baluchon/
 ├── app.py                  # Point d'entrée de l'application
+
 ├── config.py               # Configuration de l'application
+
 ├── models.py               # Modèles de la base de données
+
 ├── requirements.txt        # Dépendances Python
+
 ├── static/                 # Fichiers statiques (CSS, JS, images)
+
 ├── templates/              # Templates HTML
+
 ├── migrations/             # Migrations de la base de données
+
 ├── scripts/                # Scripts utilitaires
+
 └── README.md               # Ce fichier
 
 
