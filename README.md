@@ -62,3 +62,10 @@
 
 - Make sure you are in the project directory (cd path/to/baluchon).
 - If you encounter any errors, check that all dependencies are installed (pip install -r requirements.txt).
+- If you prefer using the flask command, set the FLASK_APP environment variable first:
+   ```bash
+   export FLASK_APP=app.py
+   flask run
+   ```
+
+
