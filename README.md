@@ -45,7 +45,7 @@
    ```   
 
 ---
-## **Launch the Project**
+## **Launch your local instance of Baluchon**
 
 1. **Activate the virtual environment** (if not already active):
    ```bash
@@ -57,3 +57,8 @@
    python app.py
    ```
 (The application will start and be available at http://127.0.0.1:5000.)
+
+**Notes:**
+
+- Make sure you are in the project directory (cd path/to/baluchon).
+- If you encounter any errors, check that all dependencies are installed (pip install -r requirements.txt).
