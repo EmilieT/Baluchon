@@ -39,12 +39,7 @@ It is designed for bioinformatics projects.
    ```bash
    pip install -r requirements.txt
    ```
-4. Create your environment variables (.env file)
-   ```bash
-   SECRET_KEY=ta_cle_secrete_ici
-   DATABASE_URI=sqlite:///baluchon.db
-   ```
-5. Initiate your database
+4. Initiate your database
   ```bash
   mkdir -p instance
   flask db init
