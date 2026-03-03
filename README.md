@@ -1,7 +1,5 @@
 # Baluchon
 
-# Baluchon
-
 **Baluchon** is a Flask application designed to facilitate the management of projects, events, and tasks for bioinformatics projects.
 
 ---
