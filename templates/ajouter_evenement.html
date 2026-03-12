@@ -44,6 +44,11 @@
                         <option value="en cours">En cours</option>
                         <option value="terminé">Terminé</option>
                     </select>
+                    <input type="hidden" name="visibilites[]" value="prive">
+                    <div class="form-check form-switch d-flex align-items-center me-2">
+                        <input class="form-check-input" type="checkbox" id="visibilite-toggle-0">
+                        <span class="visibilite-badge ms-2 text-muted">Privé</span>
+                    </div>
                     <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
                 </div>
             </div>
@@ -56,39 +61,9 @@
         </div>
     </form>
 </div>
+{% endblock %}
 
-<!-- Script pour gérer l'ajout/suppression dynamique des tâches -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const container = document.getElementById('taches-container');
-
-        // Ajouter une tâche
-        document.getElementById('ajouter-tache').addEventListener('click', function() {
-            const newTacheDiv = document.createElement('div');
-            newTacheDiv.className = 'tache-input mb-2 d-flex align-items-center';
-            newTacheDiv.innerHTML = `
-                <input type="hidden" name="tache_ids[]" value="">
-                <input type="text" class="form-control me-2 flex-grow-1" name="taches[]" placeholder="Description de la tâche">
-                <input type="date" class="form-control me-2" name="date_limite[]" placeholder="Date limite">
-                <select class="form-select me-2" name="statuts[]">
-                    <option value="à faire" selected>À faire</option>
-                    <option value="en cours">En cours</option>
-                    <option value="terminé">Terminé</option>
-                </select>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
-            `;
-            container.appendChild(newTacheDiv);
-        });
-
-        // Supprimer une tâche
-        container.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-tache') || e.target.closest('.remove-tache')) {
-                const tacheDiv = e.target.closest('.tache-input');
-                if (tacheDiv) {
-                    tacheDiv.remove();
-                }
-            }
-        });
-    });
-</script>
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/taches.js') }}"></script>
 {% endblock %}

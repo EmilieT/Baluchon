@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Changer l'environnement{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Changer l'environnement</h2>
+    <form method="POST" action="{{ url_for('changer_environnement', projet_id=projet_user.projet_id) }}">
+        <div class="mb-3">
+            <label for="chemin_proj" class="form-label">Chemin vers le fichier projet</label>
+            <input type="text" class="form-control" id="chemin_proj" name="chemin_proj" value="{{ projet_user.chemin_proj }}" required>
+        </div>
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a href="{{ url_for('projet_dashboard', projet_id=projet_user.projet_id) }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

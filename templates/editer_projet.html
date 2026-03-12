@@ -19,9 +19,9 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Avertissement sur la suppression et la modification -->
+        <!-- Avertissement sur la modification -->
         <div class="alert alert-info mb-4">
-            <i class="bi bi-info-circle"></i> La suppression et la modification d'un projet ne supprime que son suivi dans Baluchon. Vos fichiers restent intacts sur votre disque dur.
+            <i class="bi bi-info-circle"></i> La modification d'un projet ne modifie que son suivi dans Baluchon. Vos fichiers restent intacts sur votre disque dur.
         </div>
 
         <!-- Formulaire d'édition -->
@@ -31,23 +31,45 @@
                 <input type="text" class="form-control" id="nom" name="nom" value="{{ projet.nom }}" required>
             </div>
             <div class="mb-3">
-                <label for="chemin_rproj" class="form-label">Chemin vers le fichier .Rproj</label>
-                <input type="text" class="form-control" id="chemin_rproj" name="chemin_rproj" value="{{ projet.chemin_rproj }}" required>
-            </div>
-            <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
                 <textarea class="form-control" id="description" name="description" rows="3" required>{{ projet.description }}</textarea>
             </div>
 
+            <!-- Champ de visibilité (uniquement pour les ADMIN) -->
+            {% if projet_user.role.value == 'admin' %}
+            <div class="mb-3">
+                <label for="visibilite" class="form-label">Visibilité</label>
+                <select class="form-select" id="visibilite" name="visibilite" required>
+                    <option value="PRIVE" {% if projet.visibilite == VisibiliteEnum.PRIVE %}selected{% endif %}>Privé</option>
+                    <option value="PUBLIC" {% if projet.visibilite == VisibiliteEnum.PUBLIC %}selected{% endif %}>Public</option>
+                </select>
+            </div>
+            {% else %}
+            <div class="mb-3">
+                <label class="form-label">Visibilité</label>
+                <input type="text" class="form-control" value="{{ projet.visibilite.value }}" readonly>
+            </div>
+            {% endif %}
+
             <div class="d-flex justify-content-between mt-4">
                 <button type="submit" class="btn btn-success">Enregistrer les modifications</button>
+                <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn btn-secondary">Annuler</a>
             </div>
         </form>
 
-        <!-- Formulaire de suppression séparé -->
+        <!-- Lien vers la page d'ajout d'utilisateur (accessible à tous les membres) -->
+        <div class="mt-3">
+            <a href="{{ url_for('inviter_utilisateur', projet_id=projet.id) }}" class="btn btn-outline-primary w-100">
+                <i class="bi bi-person-plus"></i> Ajouter un utilisateur
+            </a>
+        </div>
+
+        <!-- Formulaire de suppression séparé (uniquement pour les admins) -->
+        {% if projet_user.role.value == 'admin' %}
         <form method="POST" action="{{ url_for('supprimer_projet', projet_id=projet.id) }}" class="mt-3" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce projet de Baluchon ?\n\nSeul le suivi sera supprimé, vos fichiers resteront intacts.')">
             <button type="submit" class="btn btn-danger w-100">Supprimer ce projet</button>
         </form>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

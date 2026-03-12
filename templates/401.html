@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Accès non autorisé{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <div class="alert alert-warning">
+        <h2 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Accès non autorisé</h2>
+        <p>Vous devez être connecté pour accéder à cette page.</p>
+        <hr>
+        <p class="mb-0">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Se connecter</a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Retour à l'accueil</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

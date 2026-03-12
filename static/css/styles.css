@@ -1,0 +1,100 @@
+/* styles.css */
+body {
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+.header {
+    background-color: #ffffff;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+.logo {
+    max-height: 50px;
+    margin-right: 15px;
+}
+
+.main-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.container {
+    padding: 20px;
+}
+
+.projet-card {
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.projet-card h2 {
+    margin-top: 0;
+}
+
+.projet-card p {
+    color: #6c757d;
+}
+
+.projet-card a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.projet-card a:hover {
+    text-decoration: underline;
+}
+
+/* Style pour le conteneur principal */
+.container {
+    padding: 20px;
+    max-width: 1200px;
+}
+
+/* Style pour les cartes */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+/* Style pour l'en-tête des cartes */
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 1rem;
+}
+
+/* Style pour le corps des cartes */
+.card-body {
+    padding: 1.5rem;
+}

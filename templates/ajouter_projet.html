@@ -12,9 +12,9 @@
                 <input type="text" class="form-control" id="nom" name="nom" required>
             </div>
             <div class="mb-3">
-                <label for="chemin_rproj" class="form-label">Chemin vers le fichier Projet</label>
-                <input type="text" class="form-control" id="chemin_rproj" name="chemin_rproj" placeholder="/chemin/vers/votre_projet.Rproj" required>
-            <small class="form-text text-muted">
+                <label for="chemin_proj" class="form-label">Chemin vers le fichier Projet</label>
+                <input type="text" class="form-control" id="chemin_proj" name="chemin_proj" placeholder="/chemin/vers/votre_projet.Rproj" required>
+                <small class="form-text text-muted">
                     "Copier en tant que chemin"
                 </small>
             </div>
@@ -22,8 +22,17 @@
                 <label for="description" class="form-label">Description</label>
                 <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
             </div>
-            <button type="submit" class="btn btn-success">Ajouter le projet</button>
-            <a href="{{ url_for('index') }}" class="btn btn-secondary">Annuler</a>
+            <div class="mb-3">
+                <label for="visibilite" class="form-label">Visibilité</label>
+                <select class="form-select" id="visibilite" name="visibilite" required>
+                    <option value="PRIVE" selected>Privé</option>
+                    <option value="PUBLIC">Public</option>
+                </select>
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" class="btn btn-success">Ajouter le projet</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Annuler</a>
+            </div>
         </form>
     </div>
 </div>

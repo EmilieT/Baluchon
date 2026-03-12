@@ -3,64 +3,55 @@
 <head>
     <title>Baluchon - {% block title %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/taches.css') }}">
+    {% block extra_css %}{% endblock %}
     <script src="{{ url_for('static', filename='js/taches.js') }}"></script>
-    <style>
-        body {
-            padding: 0;
-            background-color: #f8f9fa;
-        }
-        .header {
-            background-color: #ffffff;
-            padding: 10px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-        .logo {
-            max-height: 50px;
-            margin-right: 15px;
-        }
-        .main-title {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 500;
-        }
-        .logo-link {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: inherit;
-        }
-        .container {
-            padding: 20px;
-        }
-        .projet-card {
-            margin-bottom: 20px;
-            border-left: 4px solid #007bff;
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-    </style>
 </head>
 <body>
-
     <header class="header">
         <div class="logo-container">
             <a href="{{ url_for('index') }}" class="logo-link">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Baluchon" class="logo">
                 <h1 class="main-title">Baluchon</h1>
             </a>
+            <div class="auth-buttons">
+                {% if current_user.is_authenticated %}
+                    <span>Bonjour, {{ current_user.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-danger">Se déconnecter</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-sm btn-primary">Se connecter</a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
-<!-- Messages flash -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="bi bi-house-door"></i> Accueil
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'liste_utilisateurs' %}active{% endif %}" href="{{ url_for('liste_utilisateurs') }}">
+                                <i class="bi bi-people"></i> Utilisateurs
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="container mt-3">
@@ -73,7 +64,6 @@
             </div>
         {% endif %}
     {% endwith %}
-
 
     <div class="container">
         {% block content %}{% endblock %}

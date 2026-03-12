@@ -1,0 +1,64 @@
+/* taches.css */
+.tache-input {
+    border: 1px solid #ced4da;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+.tache-input input,
+.tache-input select {
+    margin-bottom: 5px;
+}
+
+.tache-input .form-check {
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.tache-input .form-check-input {
+    margin-top: 0;
+}
+
+.tache-input .form-check-label {
+    margin-left: 5px;
+}
+
+.tache-input .remove-tache {
+    margin-left: 10px;
+}
+
+/* Style pour le label de visibilité */
+.visibilite-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Style pour le conteneur de l'interrupteur */
+.d-flex.align-items-center.me-2 {
+    margin-right: 0.5rem !important;
+}
+
+/* Style pour l'interrupteur */
+.form-switch .form-check-input {
+    width: 2.2em;
+    height: 1.2em;
+    margin-top: 0.1em;
+}
+
+/* Style pour le badge de visibilité */
+.visibilite-badge {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Couleurs pour les états */
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}

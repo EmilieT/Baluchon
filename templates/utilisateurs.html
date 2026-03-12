@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des utilisateurs{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/utilisateurs.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Liste des utilisateurs</h1>
+
+    <!-- Affichage des messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Tableau des utilisateurs -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Utilisateurs inscrits</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom d'utilisateur</th>
+                            <th>Projets</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for utilisateur in utilisateurs %}
+                        <tr>
+                            <td>{{ utilisateur.id }}</td>
+                            <td>{{ utilisateur.username }}</td>
+                            <td>{{ utilisateur.projets|length }}</td>
+                            <td>
+                                <a href="{{ url_for('voir_profil', user_id=utilisateur.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Voir
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
