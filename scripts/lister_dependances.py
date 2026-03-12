@@ -71,3 +71,25 @@ def lister_fichiers_par_dependance(dossier_racine):
             dependances_et_fichiers[dep].append(fichier)
 
     return dependances_et_fichiers
+
+def lister_fichiers_html_par_date(chemin_proj):
+    dossier_projet = os.path.dirname(os.path.abspath(chemin_proj))
+    fichiers_html = []
+
+    for racine, dirs, fichiers_dans_dossier in os.walk(dossier_projet):
+        # Ignorer les dossiers cachés ou spécifiques comme .Rproj.user
+        if '.Rproj.user' in racine:
+            continue
+
+        for fichier in fichiers_dans_dossier:
+            if fichier.endswith('.html') and not fichier.startswith('._') and not fichier.startswith('.'):
+                chemin_complet = os.path.join(racine, fichier)
+                chemin_relatif = os.path.relpath(chemin_complet, start=dossier_projet)
+                date_modification = os.path.getmtime(chemin_complet)
+                fichiers_html.append((fichier, chemin_relatif, date_modification))
+
+    # Trier les fichiers par date de modification (du plus récent au plus ancien)
+    fichiers_html.sort(key=lambda x: x[2], reverse=True)
+
+    return fichiers_html
+    
