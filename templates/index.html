@@ -15,9 +15,11 @@
             </h2>
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('ajouter_projet') }}" class="btn btn-primary btn-custom">Ajouter un projet</a>
+                <a href="{{ url_for('mon_compte.mon_dashboard') }}" class="btn btn-sm btn-outline-secondary">Mon Dashboard</a>
             {% else %}
                 <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-custom">Se connecter</a>
             {% endif %}
+        
         </div>
 
         {% if projets %}
@@ -45,6 +47,7 @@
                 {% endif %}
             </div>
         {% endif %}
+
     </div>
 </div>
 {% endblock %}

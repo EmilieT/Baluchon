@@ -125,7 +125,6 @@ class Tache(db.Model):
     projet_id = db.Column(db.Integer, db.ForeignKey('projet.id'), nullable=False)
     createur_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     evenement_id = db.Column(db.Integer, db.ForeignKey('evenement.id'), nullable=True)  
-    
     # Relations
     projet = db.relationship("Projet", back_populates="taches")
     createur = db.relationship("User", back_populates="taches")

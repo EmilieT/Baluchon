@@ -62,5 +62,8 @@ register_fichiers_routes(app)
 from routes.taches import register_taches_routes
 register_taches_routes(app)
 
+from routes.mon_compte import mon_compte_bp
+app.register_blueprint(mon_compte_bp, url_prefix='/mon_compte')
+
 if __name__ == '__main__':
     app.run(debug=True)

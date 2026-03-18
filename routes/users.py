@@ -2,7 +2,9 @@
 from flask import render_template, request, redirect, url_for, flash, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
-from models import User, Projet, ProjetUser, RoleEnum, db
+from models import Evenement, Tache, User, Projet, ProjetUser, RoleEnum, db
+from routes import evenements, taches
+from routes import taches
 
 def register_user_routes(app):
     @app.route('/login', methods=['GET', 'POST'])
@@ -85,3 +87,27 @@ def register_user_routes(app):
         roles = [(role.value, role.name) for role in RoleEnum]
 
         return render_template('inviter_utilisateur.html', projet=projet, roles=roles, utilisateurs=utilisateurs)
+    
+    # Supprimer un utilisateur d'un projet 
+    @app.route('/projet/<int:projet_id>/supprimer_utilisateur/<int:user_id>', methods=['POST'])
+    @login_required
+    def supprimer_utilisateur(projet_id, user_id):
+        projet = Projet.query.get_or_404(projet_id)
+
+        # Vérifier que l'utilisateur actuel est membre du projet
+        is_member = any(membre.user_id == current_user.id for membre in projet.membres)
+        if not is_member and projet.createur_id != current_user.id:
+            abort(403)
+
+        # Vérifier que l'utilisateur à supprimer est membre du projet
+        membre = ProjetUser.query.filter_by(projet_id=projet_id, user_id=user_id).first()
+        if not membre:
+            flash('Cet utilisateur n\'est pas membre du projet.', 'warning')
+            return redirect(url_for('editer_projet', projet_id=projet_id))
+
+        # Supprimer le membre du projet
+        db.session.delete(membre)
+        db.session.commit()
+        flash('L\'utilisateur a été supprimé du projet.', 'success')
+        return redirect(url_for('editer_projet', projet_id=projet_id))
+

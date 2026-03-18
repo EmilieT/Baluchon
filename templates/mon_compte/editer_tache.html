@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Éditer une Tâche{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Éditer une Tâche</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('mon_compte.editer_tache', tache_id=tache.id) }}">
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required>{{ tache.description }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="date_limite" class="form-label">Date limite</label>
+                    <input type="date" class="form-control" id="date_limite" name="date_limite" value="{{ tache.date_limite.strftime('%Y-%m-%d') if tache.date_limite else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select class="form-select" id="statut" name="statut" required>
+                        <option value="à faire" {% if tache.statut == 'à faire' %}selected{% endif %}>À faire</option>
+                        <option value="en cours" {% if tache.statut == 'en cours' %}selected{% endif %}>En cours</option>
+                        <option value="en attente" {% if tache.statut == 'en attente' %}selected{% endif %}>En attente</option>
+                        <option value="terminé" {% if tache.statut == 'terminé' %}selected{% endif %}>Terminé</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-1"></i> Enregistrer
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Mes Tâches{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Mes Tâches</h2>
+<script>
+    console.log("JS chargé !");
+</script>
+    <!-- Bouton pour ajouter une tâche -->
+    <div class="d-flex justify-content-end mb-3">
+        <button id="ajouter-tache" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Ajouter une tâche
+        </button>
+    </div>
+
+    <!-- Conteneur pour le formulaire d'ajout dynamique -->
+    <div id="taches-container" class="mb-4"></div>
+
+    <!-- Liste des tâches -->
+    <div class="card">
+        <div class="card-body">
+            {% if taches %}
+ <div class="table-responsive">
+    <table id="table-taches" class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Projet</th>
+                <th>Description</th>
+                <th>Date de création</th>
+                <th>Date limite</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tache in taches %}
+            <tr>
+                <td><strong>{{ tache.projet.nom }}</strong></td>
+                <td>{{ tache.description }}</td>
+                <td>{{ tache.date_creation.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    {% if tache.date_limite %}
+                    {{ tache.date_limite.strftime('%d/%m/%Y') }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    <form action="{{ url_for('changer_statut', tache_id=tache.id) }}" method="POST" class="d-inline">
+                        <select name="statut"
+                                class="form-select form-select-sm
+                                {% if tache.statut == 'en cours' %}bg-warning text-dark
+                                {% elif tache.statut == 'en attente' %}bg-info text-dark
+                                {% elif tache.statut == 'à faire' %}bg-secondary text-white
+                                {% else %}bg-success text-white
+                                {% endif %}"
+                                onchange="this.form.submit()">
+                            <option value="à faire" {% if tache.statut == 'à faire' %}selected{% endif %}>À faire</option>
+                            <option value="en cours" {% if tache.statut == 'en cours' %}selected{% endif %}>En cours</option>
+                            <option value="en attente" {% if tache.statut == 'en attente' %}selected{% endif %}>En attente</option>
+                            <option value="terminé" {% if tache.statut == 'terminé' %}selected{% endif %}>Terminé</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <div class="d-flex gap-2">
+                        {% if tache.evenement_id %}
+                        <a href="{{ url_for('evenement_detail', evenement_id=tache.evenement_id) }}" class="text-decoration-none" title="Voir l'événement">
+                            <i class="bi bi-link-45deg text-muted"></i>
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('editer_tache', tache_id=tache.id) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+           {% else %}
+            <p class="text-muted">Aucune tâche trouvée.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Script JavaScript intégré directement dans le template -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ajouterTacheBtn = document.getElementById('ajouter-tache');
+        const tachesContainer = document.getElementById('taches-container');
+
+        ajouterTacheBtn.addEventListener('click', function() {
+            // Supprimer tout formulaire existant avant d'en ajouter un nouveau
+            tachesContainer.innerHTML = '';
+
+            const newTacheDiv = document.createElement('div');
+            newTacheDiv.className = 'card mb-3';
+            newTacheDiv.innerHTML = `
+                <div class="card-body">
+                    <form action="{{ url_for('mon_compte.ajouter_tache_mes_taches') }}" method="POST" class="d-flex flex-wrap gap-2 align-items-end">
+                        <div class="flex-grow-1">
+                            <label for="projet_id" class="form-label">Projet</label>
+                            <select name="projet_id" class="form-select" required>
+                                {% for projet in projets %}
+                                <option value="{{ projet.id }}">{{ projet.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="flex-grow-1">
+                            <label for="description" class="form-label">Description</label>
+                            <input type="text" name="description" class="form-control" required>
+                        </div>
+                        <div>
+                            <label for="date_limite" class="form-label">Date limite</label>
+                            <input type="date" name="date_limite" class="form-control">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm p-2">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm p-2 annuler-tache">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            tachesContainer.appendChild(newTacheDiv);
+
+            // Gestion de l'annulation
+            const annulerBtn = newTacheDiv.querySelector('.annuler-tache');
+            annulerBtn.addEventListener('click', function() {
+                newTacheDiv.remove();
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        // Initialiser DataTables sur le tableau avec l'id "table-taches"
+        $('#table-taches').DataTable({
+            // Options de configuration
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'  // Traduction en français
+            },
+            order: [[2, 'desc']],  // Trier par défaut par la 3ème colonne (Date de création) en ordre décroissant
+            responsive: true,  // Activer le mode responsive
+            columnDefs: [
+                { orderable: false, targets: [5] }  // Désactiver le tri sur la colonne "Actions"
+            ]
+        });
+    });
+</script>
+{% endblock %}
