@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Infos — {{ projet.nom }}{% endblock %}
+
+{% block content %}
+<div class="bal-breadcrumb">
+    <a href="{{ url_for('index') }}">Accueil</a><span class="sep">/</span>
+    <a href="{{ url_for('tous_les_projets') }}">Projets</a><span class="sep">/</span>
+    <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}">{{ projet.nom }}</a><span class="sep">/</span>
+    Infos
+</div>
+
+<div class="bal-page-header">
+    <div>
+        <h1><i class="bi bi-info-circle me-2"></i>Infos · {{ projet.nom }}</h1>
+        <div class="subtitle">{{ infos|length }} info{% if infos|length != 1 %}s{% endif %}</div>
+    </div>
+    <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn-bal-ghost"><i class="bi bi-arrow-left"></i> Tableau de bord</a>
+</div>
+
+{% if infos %}
+<div class="bal-card">
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr style="border-bottom:2px solid var(--bal-border);font-size:0.8rem;text-transform:uppercase;color:var(--bal-muted);letter-spacing:.04em;">
+                <th style="padding:0.5rem 0.6rem;text-align:left;">Intitulé</th>
+                <th style="padding:0.5rem 0.6rem;text-align:left;">Type</th>
+                <th style="padding:0.5rem 0.6rem;text-align:left;">Commentaire</th>
+                <th style="padding:0.5rem 0.6rem;text-align:center;">État</th>
+                <th style="padding:0.5rem 0.6rem;text-align:right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for lien in infos %}
+        <tr style="border-bottom:1px solid var(--bal-border);" id="lien-row-{{ lien.id }}">
+            <td style="padding:0.6rem;">
+                <div class="d-flex align-items-center gap-2">
+                    {% if lien.est_epingle %}<i class="bi bi-pin-angle-fill" style="color:var(--bal-accent);" title="Épinglée"></i>{% endif %}
+                    {% if lien.type == 'web' %}
+                    <a href="{{ lien.valeur }}" target="_blank" style="text-decoration:none;color:inherit;">{{ lien.intitule }}</a>
+                    {% elif lien.type == 'upload' %}
+                    <a href="{{ url_for('servir_lien_upload', lien_id=lien.id) }}" target="_blank" style="text-decoration:none;color:inherit;">{{ lien.intitule }}</a>
+                    {% else %}
+                    {{ lien.intitule }}
+                    {% endif %}
+                </div>
+            </td>
+            <td style="padding:0.6rem;font-size:0.85rem;color:var(--bal-muted);">{{ TYPES_LIEN_LABELS.get(lien.type, lien.type) }}</td>
+            <td style="padding:0.6rem;font-size:0.85rem;color:var(--bal-muted);">{{ lien.commentaire|truncate(50) if lien.commentaire else '—' }}</td>
+            <td style="padding:0.6rem;text-align:center;">
+                <span id="etat-{{ lien.id }}" class="text-muted" style="font-size:0.8rem;">—</span>
+            </td>
+            <td style="padding:0.6rem;text-align:right;">
+                <div class="d-flex gap-1 justify-content-end">
+                    <button type="button" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;font-size:0.8rem;" onclick="verifierLien({{ lien.id }})" title="Vérifier">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <a href="{{ url_for('editer_lien', lien_id=lien.id, retour=request.full_path) }}" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;font-size:0.8rem;" title="Éditer">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('basculer_epingle', lien_id=lien.id) }}" style="display:inline;">
+                        <input type="hidden" name="retour" value="{{ request.full_path }}">
+                        <button type="submit" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;font-size:0.8rem;" title="{{ 'Désépingler' if lien.est_epingle else 'Épingler' }}">
+                            <i class="bi bi-pin-angle{{ '-fill' if lien.est_epingle else '' }}"></i>
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('supprimer_lien', lien_id=lien.id) }}" onsubmit="return confirm('Supprimer cette info ?')" style="display:inline;">
+                        <input type="hidden" name="retour" value="{{ request.full_path }}">
+                        <button type="submit" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;font-size:0.8rem;color:var(--bal-danger);" title="Supprimer">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-3">
+        <button type="button" class="btn-bal-outline" onclick="verifierTous()">
+            <i class="bi bi-check2-all"></i> Vérifier tous les liens
+        </button>
+    </div>
+</div>
+{% else %}
+<div class="bal-empty">
+    <i class="bi bi-info-circle"></i>
+    Aucune info pour ce projet.
+</div>
+{% endif %}
+
+<script>
+const idsLiens = [{% for lien in infos %}{{ lien.id }}{% if not loop.last %},{% endif %}{% endfor %}];
+
+function verifierLien(id) {
+    const cell = document.getElementById('etat-' + id);
+    cell.innerHTML = '<span style="color:var(--bal-muted);">…</span>';
+    fetch('/lien/' + id + '/verifier', {method: 'POST'})
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                cell.innerHTML = '<span style="color:#2d6a3f;" title="' + data.message + '"><i class="bi bi-check-circle-fill"></i></span>';
+            } else {
+                cell.innerHTML = '<span style="color:var(--bal-danger);" title="' + data.message + '"><i class="bi bi-x-circle-fill"></i></span>';
+            }
+        })
+        .catch(() => {
+            cell.innerHTML = '<span style="color:var(--bal-warning);"><i class="bi bi-exclamation-circle"></i></span>';
+        });
+}
+
+function verifierTous() {
+    idsLiens.forEach(id => verifierLien(id));
+}
+</script>
+{% endblock %}

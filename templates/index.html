@@ -1,28 +1,211 @@
 {% extends "base.html" %}
+{% block title %}Accueil<script>
+let calVisible = false;
 
-{% block title %}Liste des projets{% endblock %}
+function toggleCalendrier() {
+    calVisible = !calVisible;
+    document.getElementById('zone-calendrier').style.display = calVisible ? 'block' : 'none';
+    document.getElementById('zone-liste-evenements').style.display = calVisible ? 'none' : 'block';
+    document.getElementById('label-cal-toggle').textContent = calVisible ? 'Vue liste' : 'Vue calendrier';
+    if (calVisible && document.getElementById('zone-calendrier').innerHTML.trim() === '') {
+        const now = new Date();
+        chargerCalendrier(now.getFullYear(), now.getMonth() + 1);
+    }
+}
+
+function chargerCalendrier(annee, mois) {
+    fetch(`/calendrier?annee=${annee}&mois=${mois}`)
+        .then(r => r.text())
+        .then(html => { document.getElementById('zone-calendrier').innerHTML = html; });
+}
+
+function voirJour(annee, mois, jour) {
+    fetch(`/calendrier/jour/${annee}/${mois}/${jour}`)
+        .then(r => r.text())
+        .then(html => { document.getElementById('jour-detail').innerHTML = html; });
+}
+</script>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Liste des projets</h2>
-            <a href="{{ url_for('ajouter_projet') }}" class="btn btn-primary btn-custom">Ajouter un projet</a>
-        </div>
-        {% if projets %}
-        <div class="list-group">
-            {% for projet in projets %}
-            <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="list-group-item list-group-item-action projet-card">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ projet.nom }}</h5>
-                </div>
-                <p class="mb-1">{{ projet.description }}</p>
-            </a>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="alert alert-info">Aucun projet trouvé. Commencez par en ajouter un !</div>
-        {% endif %}
+<div class="bal-page-header">
+    <div>
+        <h1>Bonjour 👋</h1>
+        <div class="subtitle">Voici un aperçu de vos projets et activités.</div>
+    </div>
+    <a href="{{ url_for('ajouter_projet') }}" class="btn-bal"><i class="bi bi-plus"></i> Nouveau projet</a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('tous_les_projets', statut='en cours') }}" class="stat-card">
+            <div class="stat-num">{{ nb_projets_en_cours }}</div>
+            <div class="stat-label"><i class="bi bi-folder2 me-1"></i>Projets en cours</div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('tous_les_projets', statut='en attente') }}" class="stat-card">
+            <div class="stat-num">{{ nb_projets_en_attente }}</div>
+            <div class="stat-label"><i class="bi bi-hourglass-split me-1"></i>Projets en attente</div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('vue_globale_taches') }}" class="stat-card">
+            <div class="stat-num">{{ nb_taches_ouvertes }}</div>
+            <div class="stat-label"><i class="bi bi-check2-square me-1"></i>Tâches ouvertes</div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('tous_les_evenements') }}?periode=avenir" class="stat-card">
+            <div class="stat-num">{{ nb_evenements_a_venir }}</div>
+            <div class="stat-label"><i class="bi bi-calendar3 me-1"></i>Événements à venir</div>
+        </a>
     </div>
 </div>
+
+<div class="row g-4">
+    <!-- Projets actifs -->
+    <div class="col-md-6">
+        <div class="bal-card">
+            <div class="bal-card-header">
+                <i class="bi bi-folder2-open me-1"></i>Projets en cours
+            </div>
+            {% if projets_actifs %}
+                {% for projet in projets_actifs %}
+                <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" style="text-decoration:none;color:inherit;">
+                <div class="bal-list-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>{{ projet.nom }}</strong>
+                        <span class="statut-badge statut-en-cours">En cours</span>
+                    </div>
+                    {% if projet.description %}
+                    <div class="text-muted small mt-1">{{ projet.description|truncate(80) }}</div>
+                    {% endif %}
+                </div>
+                </a>
+                {% endfor %}
+                <div class="mt-2 text-end">
+                    <a href="{{ url_for('tous_les_projets') }}" class="btn-bal-ghost btn-sm">Tous les projets →</a>
+                </div>
+            {% else %}
+                <div class="bal-empty">
+                    <i class="bi bi-folder2"></i>
+                    Aucun projet en cours.
+                    <div class="mt-2"><a href="{{ url_for('ajouter_projet') }}" class="btn-bal">Créer un projet</a></div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tâches ouvertes (à côté des projets) -->
+    <div class="col-md-6">
+        <div class="bal-card">
+            <div class="bal-card-header">
+                <i class="bi bi-check2-square me-1"></i>Tâches ouvertes
+            </div>
+            {% if taches_a_venir %}
+                {% for tache in taches_a_venir %}
+                <div class="bal-list-item" style="{% if tache.urgence_deadline %}border-left:3px solid {% if tache.urgence_deadline == 'depassee' %}#b3433f{% else %}#d99a3a{% endif %};{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div style="flex:1;">
+                            <div>{{ tache.description|truncate(50) }}</div>
+                            <small class="text-muted">
+                                <a href="{{ url_for('projet_dashboard', projet_id=tache.projet_id) }}" style="color:var(--bal-muted);">
+                                    {{ tache.projet.nom }}
+                                </a>
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if tache.date_limite %}
+                            <small class="text-muted">{{ tache.date_limite.strftime('%d/%m') }}</small>
+                            {% endif %}
+                            <span class="tache-badge tache-{{ tache.statut|replace(' ','-')|replace('à','a') }}">{{ tache.statut }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="mt-2 text-end">
+                    <a href="{{ url_for('vue_globale_taches') }}" class="btn-bal-ghost btn-sm">Toutes les tâches →</a>
+                </div>
+            {% else %}
+                <div class="bal-empty">
+                    <i class="bi bi-check-all"></i>
+                    Aucune tâche ouverte.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Prochains événements (pleine largeur en bas) -->
+    <div class="col-12">
+        <div class="bal-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="bal-card-header mb-0">
+                    <i class="bi bi-calendar-event me-1"></i>Prochains événements
+                </div>
+                <button type="button" class="btn-bal-ghost" style="font-size:0.8rem;" onclick="toggleCalendrier()">
+                    <i class="bi bi-calendar3"></i> <span id="label-cal-toggle">Vue calendrier</span>
+                </button>
+            </div>
+
+            <div id="zone-calendrier" style="display:none;margin-bottom:1rem;max-width:340px;"></div>
+
+            <div id="zone-liste-evenements">
+            {% if evenements_a_venir %}
+            <div class="row g-2">
+                {% for evt in evenements_a_venir %}
+                <div class="col-md-4">
+                <a href="{{ url_for('evenement_detail', evenement_id=evt.id) }}" style="text-decoration:none;color:inherit;">
+                <div class="bal-list-item">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="tache-badge tache-en-cours">{{ evt.type }}</span>
+                        <small class="text-muted">{{ evt.date.strftime('%d/%m %H:%M') }}</small>
+                    </div>
+                    <div class="small">{{ evt.contenu|truncate(80) }}</div>
+                    <small class="text-muted">{{ evt.projet.nom }}</small>
+                </div>
+                </a>
+                </div>
+                {% endfor %}
+            </div>
+                <div class="mt-2 text-end">
+                    <a href="{{ url_for('tous_les_evenements') }}?periode=avenir" class="btn-bal-ghost btn-sm">Tous les événements →</a>
+                </div>
+            {% else %}
+                <div class="bal-empty">
+                    <i class="bi bi-calendar3"></i>
+                    Aucun événement à venir.
+                </div>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+let calVisible = false;
+
+function toggleCalendrier() {
+    calVisible = !calVisible;
+    document.getElementById('zone-calendrier').style.display = calVisible ? 'block' : 'none';
+    document.getElementById('zone-liste-evenements').style.display = calVisible ? 'none' : 'block';
+    document.getElementById('label-cal-toggle').textContent = calVisible ? 'Vue liste' : 'Vue calendrier';
+    if (calVisible && document.getElementById('zone-calendrier').innerHTML.trim() === '') {
+        const now = new Date();
+        chargerCalendrier(now.getFullYear(), now.getMonth() + 1);
+    }
+}
+
+function chargerCalendrier(annee, mois) {
+    fetch(`/calendrier?annee=${annee}&mois=${mois}`)
+        .then(r => r.text())
+        .then(html => { document.getElementById('zone-calendrier').innerHTML = html; });
+}
+
+function voirJour(annee, mois, jour) {
+    fetch(`/calendrier/jour/${annee}/${mois}/${jour}`)
+        .then(r => r.text())
+        .then(html => { document.getElementById('jour-detail').innerHTML = html; });
+}
+</script>
 {% endblock %}

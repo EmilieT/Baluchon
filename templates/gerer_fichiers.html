@@ -1,56 +1,57 @@
 {% extends "base.html" %}
-
-{% block title %}Gérer les fichiers{% endblock %}
+{% block title %}Fichiers — Événement{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="my-4">Gérer les fichiers de l'événement</h1>
+<div class="bal-breadcrumb">
+    <a href="{{ url_for('index') }}">Accueil</a><span class="sep">/</span>
+    <a href="{{ url_for('projet_dashboard', projet_id=evenement.projet_id) }}">{{ evenement.projet.nom }}</a><span class="sep">/</span>
+    <a href="{{ url_for('evenements', projet_id=evenement.projet_id) }}">Événements</a><span class="sep">/</span>
+    <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}">Détail</a><span class="sep">/</span>
+    Fichiers
+</div>
+<div class="bal-page-header">
+    <h1><i class="bi bi-paperclip me-2"></i>Fichiers de l'événement</h1>
+    <small class="text-muted">{{ evenement.type }} · {{ evenement.date.strftime('%d/%m/%Y %H:%M') }}</small>
+</div>
 
-    <div class="mb-4">
-        <a href="{{ url_for('modifier_evenement', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-secondary">
-            ← Retour à l'événement
-        </a>
-    </div>
-
-    <!-- Formulaire pour uploader des fichiers -->
-    <form method="POST" enctype="multipart/form-data" action="{{ url_for('ajouter_fichiers', evenement_id=evenement.id) }}" class="mb-4">
-        <div class="mb-3">
-            <label class="form-label">Ajouter des fichiers</label>
-            <input type="file" class="form-control" name="fichiers" multiple required>
-        </div>
-        <button type="submit" class="btn btn-primary">Uploader les fichiers</button>
+<div style="max-width:700px;">
+<div class="bal-card mb-3">
+    <div class="bal-card-header">Ajouter des fichiers</div>
+    <form method="POST" action="{{ url_for('ajouter_fichiers', evenement_id=evenement.id) }}" enctype="multipart/form-data">
+        <input type="file" class="bal-form-control mb-3" name="fichiers" multiple>
+        <small class="text-muted d-block mb-3">Formats acceptés : txt, pdf, html, png, jpg, gif, doc, docx, xls, xlsx, csv, r, rmd, rdata, rds (max 16 Mo)</small>
+        <button type="submit" class="btn-bal"><i class="bi bi-upload"></i> Envoyer</button>
     </form>
+</div>
 
-    <!-- Liste des fichiers existants -->
-    {% if evenement.fichiers %}
-    <div class="mb-3">
-        <label class="form-label">Fichiers existants</label>
-        <div class="list-group">
-            {% for fichier in evenement.fichiers %}
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <i class="bi bi-file-earmark me-2"></i>
-                    {{ fichier.nom }}
-                    <small class="text-muted ms-2">({{ fichier.taille|filesizeformat }})</small>
-                </div>
-                <div>
-                    <!-- Utilisation de la route servir_fichier avec action pour télécharger -->
-                    <a href="{{ url_for('servir_fichier', fichier_id=fichier.id) }}" class="btn btn-sm btn-outline-primary me-1" target="_blank">
-                        Ouvrir
-                    </a>
-                    <a href="{{ url_for('servir_fichier', fichier_id=fichier.id, action='telecharger') }}" class="btn btn-sm btn-outline-secondary me-1">
-                        Télécharger
-                    </a>
-                    <form method="POST" action="{{ url_for('supprimer_fichier', fichier_id=fichier.id) }}" style="display: inline;" onsubmit="return confirm('Supprimer ce fichier ?')">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
-                    </form>
-                </div>
+{% set pieces_jointes = evenement.liens|selectattr('type', 'equalto', 'upload')|list %}
+{% if pieces_jointes %}
+<div class="bal-card">
+    <div class="bal-card-header">Fichiers associés ({{ pieces_jointes|length }})</div>
+    {% for f in pieces_jointes %}
+    <div class="d-flex align-items-center justify-content-between gap-2 mb-2 p-2 rounded" style="border:1px solid var(--bal-border);">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark text-muted"></i>
+            <div>
+                <div>{{ f.nom_fichier_upload or f.intitule }}</div>
+                <small class="text-muted">{{ f.taille|filesizeformat }}</small>
             </div>
-            {% endfor %}
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('servir_fichier', fichier_id=f.id) }}" target="_blank" class="btn-bal-ghost" style="padding:0.25rem 0.6rem;font-size:0.8rem;"><i class="bi bi-eye"></i></a>
+            <a href="{{ url_for('servir_fichier', fichier_id=f.id, action='telecharger') }}" class="btn-bal-ghost" style="padding:0.25rem 0.6rem;font-size:0.8rem;"><i class="bi bi-download"></i></a>
+            <form method="POST" action="{{ url_for('supprimer_fichier', fichier_id=f.id) }}"
+                  onsubmit="return confirm('Supprimer ce fichier ?')">
+                <button type="submit" class="btn-bal-danger" style="padding:0.25rem 0.6rem;font-size:0.8rem;"><i class="bi bi-trash3"></i></button>
+            </form>
         </div>
     </div>
-    {% else %}
-    <div class="alert alert-info">Aucun fichier associé à cet événement.</div>
-    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}" class="btn-bal-ghost"><i class="bi bi-arrow-left"></i> Retour à l'événement</a>
+</div>
 </div>
 {% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Tous les projets{% endblock %}
+
+{% block content %}
+<div class="bal-page-header">
+    <h1><i class="bi bi-folder2 me-2"></i>Projets</h1>
+    <a href="{{ url_for('ajouter_projet') }}" class="btn-bal"><i class="bi bi-plus"></i> Nouveau projet</a>
+</div>
+
+<!-- Filtres statut -->
+<div class="bal-filters">
+    <div>
+        <label class="bal-label">Statut</label>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ url_for('tous_les_projets', statut='tous') }}" class="btn-bal-{{ 'outline' if statut_filtre == 'tous' else 'ghost' }}">Tous</a>
+            {% for s in STATUTS_PROJET %}
+            <a href="{{ url_for('tous_les_projets', statut=s) }}" class="btn-bal-{{ 'outline' if statut_filtre == s else 'ghost' }}">{{ s|capitalize }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% if projets %}
+    {% for projet in projets %}
+    <div class="bal-list-item">
+        <div class="d-flex justify-content-between align-items-start">
+            <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" style="text-decoration:none;color:inherit;flex:1;">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <strong>{{ projet.nom }}</strong>
+                    {% set s = projet.statut or 'en cours' %}
+                    <span class="statut-badge statut-{{ s|replace(' ','-') }}">{{ s }}</span>
+                </div>
+                {% if projet.description %}
+                <div class="text-muted small">{{ projet.description|truncate(120) }}</div>
+                {% endif %}
+                <small class="text-muted">
+                    Créé le {{ projet.date_creation.strftime('%d/%m/%Y') if projet.date_creation else '—' }}
+                    · {{ projet.nb_evenements_a_venir }} événement{% if projet.nb_evenements_a_venir != 1 %}s{% endif %} à venir
+                    · {{ projet.nb_taches_ouvertes }} tâche{% if projet.nb_taches_ouvertes != 1 %}s{% endif %} ouverte{% if projet.nb_taches_ouvertes != 1 %}s{% endif %}
+                </small>
+            </a>
+            <a href="{{ url_for('editer_projet', projet_id=projet.id) }}" class="btn-bal-ghost ms-3" style="flex-shrink:0;"><i class="bi bi-pencil"></i></a>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if pagination.pages > 1 %}
+    <div class="bal-pagination">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('tous_les_projets', page=pagination.prev_num, statut=statut_filtre) }}"><i class="bi bi-chevron-left"></i></a>
+        {% endif %}
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+                {% if p == pagination.page %}
+                <span class="current">{{ p }}</span>
+                {% else %}
+                <a href="{{ url_for('tous_les_projets', page=p, statut=statut_filtre) }}">{{ p }}</a>
+                {% endif %}
+            {% else %}
+            <span>…</span>
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+        <a href="{{ url_for('tous_les_projets', page=pagination.next_num, statut=statut_filtre) }}"><i class="bi bi-chevron-right"></i></a>
+        {% endif %}
+    </div>
+    {% endif %}
+{% else %}
+    <div class="bal-empty">
+        <i class="bi bi-folder2"></i>
+        Aucun projet trouvé.
+        {% if not statut_filtre %}
+        <div class="mt-2"><a href="{{ url_for('ajouter_projet') }}" class="btn-bal">Créer le premier projet</a></div>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

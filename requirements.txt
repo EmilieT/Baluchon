@@ -1,6 +1,7 @@
 Flask==2.2.5
 Flask-SQLAlchemy==2.5.1
-Flask-Migrate==3.1.0
+Flask-Login==0.6.3
 Werkzeug==2.2.3
 python-dotenv==0.21.1
 SQLAlchemy==1.4.46
+gunicorn==21.2.0

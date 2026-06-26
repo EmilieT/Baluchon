@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Éditer une info{% endblock %}
+
+{% block content %}
+<div class="bal-breadcrumb">
+    <a href="{{ url_for('index') }}">Accueil</a><span class="sep">/</span>
+    <a href="{{ url_for('projet_dashboard', projet_id=lien.projet_id) }}">{{ lien.projet.nom }}</a><span class="sep">/</span>
+    <a href="{{ url_for('toutes_les_infos', projet_id=lien.projet_id) }}">Infos</a><span class="sep">/</span>
+    Éditer
+</div>
+<div class="bal-page-header">
+    <h1>Éditer l'info</h1>
+</div>
+
+<div style="max-width:600px;">
+<div class="bal-card">
+    <form method="POST" action="{{ url_for('editer_lien', lien_id=lien.id) }}">
+        <input type="hidden" name="retour" value="{{ retour }}">
+        <div class="bal-form-group">
+            <label class="bal-label">Intitulé *</label>
+            <input type="text" class="bal-form-control" name="intitule" value="{{ lien.intitule }}" required>
+        </div>
+        <div class="bal-form-group">
+            <label class="bal-label">Type</label>
+            <input type="text" class="bal-form-control" value="{{ TYPES_LIEN_LABELS.get(lien.type, lien.type) }}" disabled>
+            <small class="text-muted">Le type ne peut pas être modifié.</small>
+        </div>
+        {% if lien.type == 'upload' %}
+        <div class="bal-form-group">
+            <label class="bal-label">Fichier</label>
+            <input type="text" class="bal-form-control" value="{{ lien.nom_fichier_upload or '—' }}" disabled>
+        </div>
+        {% else %}
+        <div class="bal-form-group">
+            <label class="bal-label">{% if lien.type == 'web' %}URL{% else %}Chemin{% endif %}</label>
+            <input type="text" class="bal-form-control" name="valeur" value="{{ lien.valeur }}">
+        </div>
+        {% endif %}
+        <div class="bal-form-group">
+            <label class="bal-label">Commentaire</label>
+            <input type="text" class="bal-form-control" name="commentaire" value="{{ lien.commentaire or '' }}">
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-bal"><i class="bi bi-check-lg"></i> Enregistrer</button>
+            <a href="{{ retour or url_for('toutes_les_infos', projet_id=lien.projet_id) }}" class="btn-bal-ghost">Annuler</a>
+        </div>
+    </form>
+</div>
+</div>
+{% endblock %}

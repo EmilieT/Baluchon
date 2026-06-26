@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Matrice Eisenhower{% if projet %} — {{ projet.nom }}{% endif %}{% endblock %}
+
+{% block content %}
+{% if projet %}
+<div class="bal-breadcrumb">
+    <a href="{{ url_for('index') }}">Accueil</a><span class="sep">/</span>
+    <a href="{{ url_for('tous_les_projets') }}">Projets</a><span class="sep">/</span>
+    <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}">{{ projet.nom }}</a><span class="sep">/</span>
+    Matrice
+</div>
+{% endif %}
+
+<div class="bal-page-header">
+    <div>
+        <h1><i class="bi bi-grid-3x3-gap me-2"></i>Matrice Eisenhower{% if projet %} · {{ projet.nom }}{% endif %}</h1>
+        <div class="subtitle">Tâches non terminées classées par priorité</div>
+    </div>
+    <a href="{% if projet %}{{ url_for('toutes_les_taches', projet_id=projet.id) }}{% else %}{{ url_for('vue_globale_taches') }}{% endif %}" class="btn-bal-ghost">
+        <i class="bi bi-list"></i> Vue liste
+    </a>
+</div>
+
+{% macro carte_tache_mini(t, projet_visible) %}
+<div class="bal-list-item {% if t.urgence_deadline %}deadline-border-{{ t.urgence_deadline }}{% endif %}" style="padding:0.6rem 0.8rem;margin-bottom:0.5rem;">
+    <div>{{ t.description|truncate(70) }}</div>
+    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+        {% if projet_visible %}
+        <a href="{{ url_for('projet_dashboard', projet_id=t.projet_id) }}" class="text-muted" style="font-size:0.78rem;text-decoration:none;">
+            <i class="bi bi-folder2 me-1"></i>{{ t.projet.nom }}
+        </a>
+        {% endif %}
+        {% if t.date_limite %}
+        <small class="text-muted">{{ t.date_limite.strftime('%d/%m') }}</small>
+        {% endif %}
+        {% if t.urgence_deadline == 'imminente' %}
+        <span class="deadline-flag deadline-imminente"><i class="bi bi-alarm"></i> Bientôt</span>
+        {% elif t.urgence_deadline == 'depassee' %}
+        <span class="deadline-flag deadline-depassee"><i class="bi bi-exclamation-triangle"></i> Dépassée</span>
+        {% endif %}
+        <form action="{{ url_for('changer_priorite', tache_id=t.id) }}" method="POST" class="ms-auto">
+            <select name="priorite" class="statut-select" style="font-size:0.75rem;" onchange="this.form.submit()">
+                {% for p in PRIORITES_TACHE %}
+                <option value="{{ p }}" {% if (t.priorite or 'a_planifier') == p %}selected{% endif %}>{{ PRIORITES_LABELS[p] }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <a href="{{ url_for('editer_tache', tache_id=t.id, retour=request.full_path) }}" class="btn-bal-ghost" style="padding:0.15rem 0.5rem;font-size:0.75rem;"><i class="bi bi-pencil"></i></a>
+    </div>
+</div>
+{% endmacro %}
+
+<div class="matrice-grid">
+    <div class="matrice-quadrant q-urgent_important">
+        <div class="matrice-quadrant-header">
+            <span style="font-weight:600;color:#8b2e2e;"><i class="bi bi-exclamation-octagon me-1"></i>Urgent & important</span>
+            <span class="priorite-badge priorite-urgent_important">{{ quadrants.get('urgent_important', [])|length }}</span>
+        </div>
+        {% for t in quadrants.get('urgent_important', []) %}
+            {{ carte_tache_mini(t, not projet) }}
+        {% else %}
+        <div class="text-muted small text-center py-3">Aucune tâche</div>
+        {% endfor %}
+    </div>
+
+    <div class="matrice-quadrant q-important">
+        <div class="matrice-quadrant-header">
+            <span style="font-weight:600;color:#1a5276;"><i class="bi bi-bookmark-star me-1"></i>Important</span>
+            <span class="priorite-badge priorite-important">{{ quadrants.get('important', [])|length }}</span>
+        </div>
+        {% for t in quadrants.get('important', []) %}
+            {{ carte_tache_mini(t, not projet) }}
+        {% else %}
+        <div class="text-muted small text-center py-3">Aucune tâche</div>
+        {% endfor %}
+    </div>
+
+    <div class="matrice-quadrant q-urgent">
+        <div class="matrice-quadrant-header">
+            <span style="font-weight:600;color:#b07d2a;"><i class="bi bi-lightning me-1"></i>Urgent</span>
+            <span class="priorite-badge priorite-urgent">{{ quadrants.get('urgent', [])|length }}</span>
+        </div>
+        {% for t in quadrants.get('urgent', []) %}
+            {{ carte_tache_mini(t, not projet) }}
+        {% else %}
+        <div class="text-muted small text-center py-3">Aucune tâche</div>
+        {% endfor %}
+    </div>
+
+    <div class="matrice-quadrant q-a_planifier">
+        <div class="matrice-quadrant-header">
+            <span style="font-weight:600;color:#666;"><i class="bi bi-inbox me-1"></i>À planifier</span>
+            <span class="priorite-badge priorite-a_planifier">{{ quadrants.get('a_planifier', [])|length }}</span>
+        </div>
+        {% for t in quadrants.get('a_planifier', []) %}
+            {{ carte_tache_mini(t, not projet) }}
+        {% else %}
+        <div class="text-muted small text-center py-3">Aucune tâche</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

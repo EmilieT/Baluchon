@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Statistiques{% endblock %}
+
+{% block content %}
+<div class="bal-page-header">
+    <div>
+        <h1><i class="bi bi-bar-chart me-2"></i>Statistiques</h1>
+        <div class="subtitle">Diagramme de Gantt et bilan d'activité sur une période</div>
+    </div>
+</div>
+
+<div class="bal-filters">
+    <form method="GET" class="d-flex gap-3 flex-wrap align-items-end" style="width:100%;">
+        <div>
+            <label class="bal-label">Du</label>
+            <input type="date" class="bal-form-control" name="date_debut" value="{{ date_debut }}">
+        </div>
+        <div>
+            <label class="bal-label">Au</label>
+            <input type="date" class="bal-form-control" name="date_fin" value="{{ date_fin }}">
+        </div>
+        <button type="submit" class="btn-bal"><i class="bi bi-search"></i> Calculer</button>
+        <span class="text-muted small ms-2">{{ nb_jours_periode }} jour{% if nb_jours_periode != 1 %}s{% endif %}</span>
+    </form>
+</div>
+
+<!-- Compteurs -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-num">{{ gantt_projets|length }}</div>
+            <div class="stat-label"><i class="bi bi-folder2 me-1"></i>Projets sur la période</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-num">{{ nb_projets_en_cours_actuellement }}</div>
+            <div class="stat-label"><i class="bi bi-play-circle me-1"></i>En cours actuellement</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-num">{{ nb_projets_termines }}</div>
+            <div class="stat-label"><i class="bi bi-check-circle me-1"></i>Projets terminés</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-num">{{ nb_evenements_periode }}</div>
+            <div class="stat-label"><i class="bi bi-calendar3 me-1"></i>Événements sur la période</div>
+        </div>
+    </div>
+</div>
+
+<!-- Diagramme de Gantt -->
+<div class="bal-card mb-4">
+    <div class="bal-card-header"><i class="bi bi-bar-chart-steps me-1"></i>Diagramme de Gantt</div>
+
+    {% if gantt_projets %}
+    {% set duree_totale = (date_fin_dt - date_debut_dt).total_seconds() %}
+    {% set statut_couleur = {'en cours':'#3d6b4f','en attente':'#b07d2a','archivé':'#888','abandonné':'#b94a4a'} %}
+
+    <!-- Échelle de mois -->
+    <div style="position:relative;height:18px;margin-bottom:0.5rem;margin-left:0;">
+        {% for date_grad, pos_pct, label in graduations_mois %}
+        <span style="position:absolute;left:{{ pos_pct }}%;font-size:0.72rem;color:var(--bal-muted);transform:translateX(-2px);">{{ label }}</span>
+        {% endfor %}
+    </div>
+
+    <div style="position:relative;">
+        {% for item in gantt_projets %}
+        {% set offset_pct = ((item.debut - date_debut_dt).total_seconds() / duree_totale * 100) %}
+        {% set largeur_pct = ((item.fin - item.debut).total_seconds() / duree_totale * 100) %}
+        {% set largeur_pct = largeur_pct if largeur_pct > 0.5 else 0.5 %}
+        <div class="mb-2">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <a href="{{ url_for('projet_dashboard', projet_id=item.projet.id) }}" style="text-decoration:none;color:inherit;font-size:0.85rem;font-weight:500;">
+                    {{ item.projet.nom }}
+                </a>
+                <small class="text-muted">{{ item.nb_evenements }} évt · {{ item.nb_taches }} tâche{% if item.nb_taches != 1 %}s{% endif %}</small>
+            </div>
+            <div style="position:relative;height:22px;background:var(--bal-bg);border-radius:4px;">
+                <div style="
+                    position:absolute;left:{{ offset_pct }}%;width:{{ largeur_pct }}%;height:100%;
+                    background:{{ statut_couleur.get(item.projet.statut, '#3d6b4f') }};
+                    border-radius:4px;opacity:0.85;
+                    "
+                    title="{{ item.projet.nom }} : {{ item.debut_reel.strftime('%d/%m/%Y') }} → {{ item.fin_reel.strftime('%d/%m/%Y') }}">
+                </div>
+                {% for d in item.marqueurs_evt %}
+                {% set pos = ((d - date_debut_dt).total_seconds() / duree_totale * 100) %}
+                <div style="position:absolute;left:{{ pos }}%;top:-2px;width:2px;height:26px;background:#1a5276;" title="Événement le {{ d.strftime('%d/%m/%Y') }}"></div>
+                {% endfor %}
+                {% for d in item.marqueurs_tache %}
+                {% set pos = ((d - date_debut_dt).total_seconds() / duree_totale * 100) %}
+                <div style="position:absolute;left:{{ pos }}%;bottom:-2px;width:2px;height:8px;background:#8a5f1a;" title="Tâche créée le {{ d.strftime('%d/%m/%Y') }}"></div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex gap-4 mt-3 small text-muted flex-wrap">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#3d6b4f;border-radius:2px;"></span> En cours</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#b07d2a;border-radius:2px;"></span> En attente</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#888;border-radius:2px;"></span> Archivé</span>
+        <span><span style="display:inline-block;width:2px;height:10px;background:#1a5276;"></span> Événement</span>
+        <span><span style="display:inline-block;width:2px;height:10px;background:#8a5f1a;"></span> Tâche créée</span>
+    </div>
+    {% else %}
+    <div class="bal-empty">
+        <i class="bi bi-bar-chart-steps"></i>
+        Aucun projet actif sur cette période.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Tableau récapitulatif -->
+<div class="bal-card">
+    <div class="bal-card-header"><i class="bi bi-list-check me-1"></i>Projets sur la période</div>
+    {% if bilan_projets %}
+    {% set etat_couleur = {
+        'Nouveau': 'statut-en-cours',
+        'Toujours en cours': 'statut-en-attente',
+        'Terminé': 'statut-archive',
+        'Abandonné': 'statut-abandonne'
+    } %}
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr style="font-size:0.78rem;color:var(--bal-muted);text-transform:uppercase;letter-spacing:.03em;">
+                <th style="text-align:left;padding:0.4rem 0.5rem;">Projet</th>
+                <th style="text-align:left;padding:0.4rem 0.5rem;">État</th>
+                <th style="text-align:left;padding:0.4rem 0.5rem;">Période d'activité</th>
+                <th style="text-align:right;padding:0.4rem 0.5rem;">Durée</th>
+                <th style="text-align:right;padding:0.4rem 0.5rem;">Évt</th>
+                <th style="text-align:right;padding:0.4rem 0.5rem;">Tâches</th>
+                <th style="text-align:right;padding:0.4rem 0.5rem;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in bilan_projets %}
+        <tr style="border-top:1px solid var(--bal-border);">
+            <td style="padding:0.5rem 0.5rem;">
+                <a href="{{ url_for('projet_dashboard', projet_id=item.projet.id) }}" style="text-decoration:none;color:inherit;font-size:0.85rem;font-weight:500;">
+                    {{ item.projet.nom }}
+                </a>
+            </td>
+            <td style="padding:0.5rem 0.5rem;">
+                <span class="statut-badge {{ etat_couleur.get(item.etat_periode, 'statut-en-cours') }}">{{ item.etat_periode }}</span>
+            </td>
+            <td style="padding:0.5rem 0.5rem;font-size:0.82rem;color:var(--bal-muted);">
+                {{ item.debut_reel.strftime('%d/%m/%Y') }} → {{ item.fin_reel.strftime('%d/%m/%Y') }}
+            </td>
+            <td style="text-align:right;padding:0.5rem 0.5rem;font-size:0.85rem;color:var(--bal-muted);">{{ item.duree_jours }} j</td>
+            <td style="text-align:right;padding:0.5rem 0.5rem;font-size:0.85rem;color:var(--bal-muted);">{{ item.nb_evenements }}</td>
+            <td style="text-align:right;padding:0.5rem 0.5rem;font-size:0.85rem;color:var(--bal-muted);">{{ item.nb_taches }}</td>
+            <td style="text-align:right;padding:0.5rem 0.5rem;font-size:0.85rem;font-weight:600;">{{ item.nb_activite }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="bal-empty">
+        <i class="bi bi-list-check"></i>
+        Aucun projet actif sur cette période.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

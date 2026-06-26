@@ -1,94 +1,77 @@
 {% extends "base.html" %}
-
-{% block title %}Ajouter un événement{% endblock %}
+{% block title %}Ajouter un événement — {{ projet.nom }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="my-4">Ajouter un événement pour {{ projet.nom }}</h1>
+<div class="bal-breadcrumb">
+    <a href="{{ url_for('index') }}">Accueil</a><span class="sep">/</span>
+    <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}">{{ projet.nom }}</a><span class="sep">/</span>
+    <a href="{{ url_for('evenements', projet_id=projet.id) }}">Événements</a><span class="sep">/</span>
+    Ajouter
+</div>
+<div class="bal-page-header">
+    <h1>Ajouter un événement</h1>
+</div>
 
-    <form method="POST" action="{{ url_for('ajouter_evenement', projet_id=projet.id) }}">
-        <!-- Champs principaux de l'événement -->
-        <div class="mb-3">
-            <label for="type" class="form-label">Type d'événement</label>
-            <select class="form-select" id="type" name="type" required>
-                <option value="réunion">Réunion</option>
-                <option value="message">Message</option>
-                <option value="note">Note</option>
-                <option value="réception">Réception de données</option>
-                <option value="envoi">Envoi de données</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="date" class="form-label">Date et heure</label>
-            <input type="datetime-local" class="form-control" id="date" name="date"
-                   value="{{ datetime.now().strftime('%Y-%m-%dT%H:%M') }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="contenu" class="form-label">Contenu</label>
-            <textarea class="form-control" id="contenu" name="contenu" rows="4" required></textarea>
-        </div>
-
-        <!-- Section pour ajouter des tâches -->
-        <div class="mb-3">
-            <label class="form-label">Tâches associées</label>
-            <div id="taches-container">
-                <!-- Une ligne vide par défaut pour ajouter une tâche -->
-                <div class="tache-input mb-2 d-flex align-items-center">
-                    <input type="hidden" name="tache_ids[]" value="">
-                    <input type="text" class="form-control me-2 flex-grow-1" name="taches[]" placeholder="Description de la tâche">
-                    <input type="date" class="form-control me-2" name="date_limite[]" placeholder="Date limite">
-                    <select class="form-select me-2" name="statuts[]">
-                        <option value="à faire" selected>À faire</option>
-                        <option value="en cours">En cours</option>
-                        <option value="terminé">Terminé</option>
-                    </select>
-                    <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
-                </div>
+<div style="max-width:700px;">
+<div class="bal-card">
+    <form method="POST" action="{{ url_for('ajouter_evenement', projet_id=projet.id) }}" id="form-evenement">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="bal-label">Type *</label>
+                <input type="text" class="bal-form-control" name="type" list="types-list" required placeholder="note, réunion, communication…">
+                <datalist id="types-list">
+                    <option value="note"><option value="réunion"><option value="communication">
+                    <option value="envoyé"><option value="reçu"><option value="autre">
+                </datalist>
             </div>
-            <button type="button" id="ajouter-tache" class="btn btn-sm btn-outline-secondary mt-2">+ Ajouter une tâche</button>
+            <div class="col-md-6">
+                <label class="bal-label">Date et heure *</label>
+                <input type="datetime-local" class="bal-form-control" name="date" required
+                       value="{{ datetime.utcnow().strftime('%Y-%m-%dT%H:%M') }}">
+            </div>
+        </div>
+        <div class="bal-form-group">
+            <label class="bal-label">Contenu *</label>
+            <textarea class="bal-form-control" name="contenu" rows="5" required></textarea>
         </div>
 
-        <div class="d-flex justify-content-end mt-4">
-            <button type="submit" name="action" value="ajouter_evenement" class="btn btn-sm btn-primary me-2">Ajouter événement</button>
-            <button type="submit" name="action" value="ajouter_fichiers" class="btn btn-sm btn-outline-primary">Enregistrer et ajouter des fichiers</button>
+        <!-- Tâches associées -->
+        <div class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="bal-label mb-0">Tâches associées</label>
+                <button type="button" class="btn-bal-outline" onclick="ajouterLigneTache()" style="font-size:0.82rem;padding:0.25rem 0.7rem;">
+                    <i class="bi bi-plus"></i> Ajouter une tâche
+                </button>
+            </div>
+            <div id="taches-container"></div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" name="action" value="sauvegarder" class="btn-bal"><i class="bi bi-check-lg"></i> Enregistrer</button>
+            <button type="submit" name="action" value="ajouter_fichiers" class="btn-bal-outline"><i class="bi bi-paperclip"></i> Enregistrer et ajouter des fichiers</button>
+            <a href="{{ url_for('evenements', projet_id=projet.id) }}" class="btn-bal-ghost">Annuler</a>
         </div>
     </form>
 </div>
+</div>
 
-<!-- Script pour gérer l'ajout/suppression dynamique des tâches -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const container = document.getElementById('taches-container');
-
-        // Ajouter une tâche
-        document.getElementById('ajouter-tache').addEventListener('click', function() {
-            const newTacheDiv = document.createElement('div');
-            newTacheDiv.className = 'tache-input mb-2 d-flex align-items-center';
-            newTacheDiv.innerHTML = `
-                <input type="hidden" name="tache_ids[]" value="">
-                <input type="text" class="form-control me-2 flex-grow-1" name="taches[]" placeholder="Description de la tâche">
-                <input type="date" class="form-control me-2" name="date_limite[]" placeholder="Date limite">
-                <select class="form-select me-2" name="statuts[]">
-                    <option value="à faire" selected>À faire</option>
-                    <option value="en cours">En cours</option>
-                    <option value="terminé">Terminé</option>
-                </select>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
-            `;
-            container.appendChild(newTacheDiv);
-        });
-
-        // Supprimer une tâche
-        container.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-tache') || e.target.closest('.remove-tache')) {
-                const tacheDiv = e.target.closest('.tache-input');
-                if (tacheDiv) {
-                    tacheDiv.remove();
-                }
-            }
-        });
-    });
+function ajouterLigneTache() {
+    const container = document.getElementById('taches-container');
+    const idx = container.children.length;
+    const div = document.createElement('div');
+    div.className = 'd-flex gap-2 mb-2 align-items-center';
+    div.innerHTML = `
+        <input type="text" class="bal-form-control" name="taches[]" placeholder="Description de la tâche" style="flex:1;">
+        <input type="date" class="bal-form-control" name="date_limite[]" style="width:150px;">
+        <select class="bal-form-control" name="statuts[]" style="width:130px;">
+            <option value="à faire">À faire</option>
+            <option value="en cours">En cours</option>
+            <option value="en attente">En attente</option>
+        </select>
+        <button type="button" onclick="this.parentElement.remove()" class="btn-bal-danger" style="padding:0.3rem 0.6rem;flex-shrink:0;"><i class="bi bi-x"></i></button>
+    `;
+    container.appendChild(div);
+}
 </script>
 {% endblock %}

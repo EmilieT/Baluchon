@@ -1,0 +1,49 @@
+<div id="mini-calendrier">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <button type="button" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;" onclick="chargerCalendrier({{ annee_prec }}, {{ mois_prec }})">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <strong style="font-size:0.9rem;">{{ nom_mois }} {{ annee }}</strong>
+        <button type="button" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;" onclick="chargerCalendrier({{ annee_suiv }}, {{ mois_suiv }})">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+        <thead>
+            <tr style="color:var(--bal-muted);">
+                <th style="padding:0.2rem;">L</th><th style="padding:0.2rem;">M</th><th style="padding:0.2rem;">M</th>
+                <th style="padding:0.2rem;">J</th><th style="padding:0.2rem;">V</th><th style="padding:0.2rem;">S</th><th style="padding:0.2rem;">D</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for semaine in semaines %}
+        <tr>
+            {% for jour in semaine %}
+            {% if jour == 0 %}
+            <td></td>
+            {% else %}
+            {% set est_aujourdhui = (aujourdhui.year == annee and aujourdhui.month == mois and aujourdhui.day == jour) %}
+            {% set a_evt = jour in jours_evenements %}
+            <td style="text-align:center;padding:0.25rem 0;">
+                <button type="button"
+                    onclick="voirJour({{ annee }}, {{ mois }}, {{ jour }})"
+                    style="
+                        width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;
+                        background:{% if est_aujourdhui %}var(--bal-accent){% else %}transparent{% endif %};
+                        color:{% if est_aujourdhui %}#fff{% else %}var(--bal-text){% endif %};
+                        position:relative;font-size:0.8rem;
+                    ">
+                    {{ jour }}
+                    {% if a_evt %}
+                    <span style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:{% if est_aujourdhui %}#fff{% else %}var(--bal-accent){% endif %};"></span>
+                    {% endif %}
+                </button>
+            </td>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div id="jour-detail" class="mt-2"></div>
+</div>

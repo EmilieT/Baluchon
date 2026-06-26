@@ -1,172 +1,272 @@
 {% extends "base.html" %}
-
-{% block title %}Événements - {{ projet.nom }}{% endblock %}
+{% block title %}{% if projet %}Événements — {{ projet.nom }}{% else %}Tous les événements{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- En-tête avec boutons -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mb-0">Événements du projet : {{ projet.nom }}</h1>
-        <div class="d-flex gap-2">
-            <a href="{{ url_for('ajouter_evenement', projet_id=projet.id) }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-1"></i> Ajouter un événement
-            </a>
-            <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Retour
-            </a>
-        </div>
+{% if projet %}
+<div class="bal-breadcrumb">
+    <a href="{{ url_for('index') }}">Accueil</a><span class="sep">/</span>
+    <a href="{{ url_for('tous_les_projets') }}">Projets</a><span class="sep">/</span>
+    <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}">{{ projet.nom }}</a><span class="sep">/</span>
+    Événements
+</div>
+{% endif %}
+
+<div class="bal-page-header">
+    <div>
+        <h1><i class="bi bi-calendar3 me-2"></i>{% if projet %}Événements · {{ projet.nom }}{% else %}Tous les événements{% endif %}</h1>
+        <div class="subtitle">{{ pagination.total }} événement{% if pagination.total != 1 %}s{% endif %}</div>
     </div>
-
-    <!-- Événements à venir -->
-    <div class="mb-5">
-        <div class="d-flex align-items-center mb-3">
-            <h3 class="mb-0 me-3">À venir</h3>
-            <span class="badge bg-primary">{{ evenements|selectattr("date", "ge", datetime.utcnow())|list|length }}</span>
-        </div>
-
-        {% for evenement in evenements if evenement.date >= datetime.utcnow() %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <span class="badge bg-light text-dark me-2">{{ evenement.type }}</span>
-                        <small class="text-muted">{{ evenement.date.strftime('%d/%m/%Y %H:%M') }}</small>
-                    </div>
-                </div>
-
-                <p class="card-text mb-3">{{ evenement.contenu }}</p>
-
-                <!-- Fichiers associés -->
-                {% if evenement.fichiers %}
-                <div class="mb-3">
-                    <h6 class="mb-2">Fichiers associés :</h6>
-                    <div class="d-flex flex-column gap-2">
-                        {% for fichier in evenement.fichiers %}
-                        <div class="d-flex align-items-center gap-2 p-2 border rounded">
-                            <i class="bi bi-file-earmark text-primary"></i>
-                            <span class="flex-grow-1 text-truncate" style="max-width: 300px;">{{ fichier.nom }}</span>
-                            <div class="d-flex gap-1">
-                                <a href="{{ url_for('servir_fichier', fichier_id=fichier.id) }}"
-                                   target="_blank"
-                                   class="btn btn-sm btn-outline-primary"
-                                   title="Visualiser">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ url_for('servir_fichier', fichier_id=fichier.id, action='telecharger') }}"
-                                   class="btn btn-sm btn-outline-secondary"
-                                   title="Télécharger">
-                                    <i class="bi bi-download"></i>
-                                </a>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Tâches associées -->
-                {% if evenement.taches %}
-                <div class="mt-3 pt-3 border-top">
-                    <h6 class="mb-2">Tâches associées :</h6>
-                    <div class="list-group list-group-flush">
-                        {% for tache in evenement.taches %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{{ tache.description }}</strong>
-                                {% if tache.date_limite %}
-                                <div class="small text-muted">
-                                    À faire avant : {{ tache.date_limite.strftime('%d/%m/%Y') }}
-                                </div>
-                                {% endif %}
-                            </div>
-                            <span class="badge
-                                {% if tache.statut == 'terminé' %}bg-success
-                                {% elif tache.statut == 'en cours' %}bg-warning text-dark
-                                {% elif tache.statut == 'en attente' %}bg-info text-dark
-                                {% else %}bg-secondary{% endif %}">
-                                {{ tache.statut }}
-                            </span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="mt-3 d-flex justify-content-end">
-                    <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}"
-                       class="btn btn-sm btn-outline-dark">
-                        Détails <i class="bi bi-chevron-right ms-1"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn-bal-ghost" onclick="toggleCalendrierEvt()">
+            <i class="bi bi-calendar3"></i> <span id="label-cal-toggle-evt">Vue calendrier</span>
+        </button>
+        {% if projet %}
+        <a href="{{ url_for('ajouter_evenement', projet_id=projet.id) }}" class="btn-bal"><i class="bi bi-plus"></i> Ajouter</a>
+        <a href="{{ url_for('projet_dashboard', projet_id=projet.id) }}" class="btn-bal-ghost"><i class="bi bi-arrow-left"></i> Tableau de bord</a>
         {% else %}
-        <div class="alert alert-info">
-            Aucun événement à venir.
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Événements passés -->
-    <div class="mb-5">
-        <div class="d-flex align-items-center mb-3">
-            <h3 class="mb-0 me-3">Passés</h3>
-            <span class="badge bg-secondary">{{ evenements|selectattr("date", "lt", datetime.utcnow())|list|length }}</span>
-        </div>
-
-        {% for evenement in evenements if evenement.date < datetime.utcnow() %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <span class="badge bg-light text-dark me-2">{{ evenement.type }}</span>
-                        <small class="text-muted">{{ evenement.date.strftime('%d/%m/%Y %H:%M') }}</small>
-                    </div>
-                </div>
-
-                <p class="card-text mb-3">{{ evenement.contenu }}</p>
-
-                <!-- Fichiers associés -->
-                {% if evenement.fichiers %}
-                <div class="mb-3">
-                    <h6 class="mb-2">Fichiers associés :</h6>
-                    <div class="d-flex flex-column gap-2">
-                        {% for fichier in evenement.fichiers %}
-                        <div class="d-flex align-items-center gap-2 p-2 border rounded">
-                            <i class="bi bi-file-earmark text-muted"></i>
-                            <span class="flex-grow-1 text-truncate" style="max-width: 300px;">{{ fichier.nom }}</span>
-                            <div class="d-flex gap-1">
-                                <a href="{{ url_for('servir_fichier', fichier_id=fichier.id) }}"
-                                   target="_blank"
-                                   class="btn btn-sm btn-outline-primary"
-                                   title="Visualiser">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ url_for('servir_fichier', fichier_id=fichier.id, action='telecharger') }}"
-                                   class="btn btn-sm btn-outline-secondary"
-                                   title="Télécharger">
-                                    <i class="bi bi-download"></i>
-                                </a>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="mt-3 d-flex justify-content-end">
-                    <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}"
-                       class="btn btn-sm btn-outline-dark">
-                        Détails <i class="bi bi-chevron-right ms-1"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <div class="alert alert-info">
-            Aucun événement passé.
-        </div>
-        {% endfor %}
+        <button type="button" class="btn-bal" data-bs-toggle="collapse" data-bs-target="#ajout-evt-global">
+            <i class="bi bi-plus"></i> Ajouter un événement
+        </button>
+        {% endif %}
     </div>
 </div>
+
+<div id="zone-calendrier-evt" style="display:none;margin-bottom:1.5rem;max-width:340px;"></div>
+
+{% if not projet %}
+<div class="collapse mb-3" id="ajout-evt-global">
+    <div class="bal-card">
+        <div class="bal-card-header">Nouvel événement</div>
+        <form method="GET" action="" id="form-choix-projet" class="d-flex gap-2 align-items-end">
+            <div style="flex:1;">
+                <label class="bal-label">Choisir le projet concerné</label>
+                <select class="bal-form-control" id="select-projet-evt">
+                    <option value="">— Sélectionner —</option>
+                    {% for p in tous_projets %}
+                    <option value="{{ p.id }}">{{ p.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" class="btn-bal" onclick="allerAjouterEvenement()">Continuer <i class="bi bi-arrow-right"></i></button>
+        </form>
+    </div>
+</div>
+<script>
+function allerAjouterEvenement() {
+    const id = document.getElementById('select-projet-evt').value;
+    if (!id) { alert('Veuillez choisir un projet.'); return; }
+    window.location.href = '/projet/' + id + '/ajouter_evenement';
+}
+</script>
+{% endif %}
+
+<!-- Filtres -->
+<div class="bal-filters">
+    <div>
+        <label class="bal-label">Période</label>
+        <div class="d-flex gap-2">
+            <a href="?periode=&type={{ type_filtre }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}" class="btn-bal-{{ 'outline' if not periode else 'ghost' }}">Tous</a>
+            <a href="?periode=avenir&type={{ type_filtre }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}" class="btn-bal-{{ 'outline' if periode == 'avenir' else 'ghost' }}">À venir</a>
+            <a href="?periode=passe&type={{ type_filtre }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}" class="btn-bal-{{ 'outline' if periode == 'passe' else 'ghost' }}">Passés</a>
+        </div>
+    </div>
+    {% if types_disponibles %}
+    <div>
+        <label class="bal-label">Type</label>
+        <select class="bal-form-control" style="width:auto;" onchange="location.search='?type='+this.value+'&periode={{ periode }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}'">
+            <option value="">Tous les types</option>
+            {% for t in types_disponibles %}
+            <option value="{{ t }}" {% if type_filtre == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    <div>
+        <label class="bal-label">Du</label>
+        <input type="date" class="bal-form-control" style="width:auto;" value="{{ date_debut }}"
+               onchange="location.search='?date_debut='+this.value+'&date_fin={{ date_fin }}&type={{ type_filtre }}&periode={{ periode }}'">
+    </div>
+    <div>
+        <label class="bal-label">Au</label>
+        <input type="date" class="bal-form-control" style="width:auto;" value="{{ date_fin }}"
+               onchange="location.search='?date_debut={{ date_debut }}&date_fin='+this.value+'&type={{ type_filtre }}&periode={{ periode }}'">
+    </div>
+    {% if type_filtre or date_debut or date_fin or periode %}
+    <div style="align-self:flex-end;">
+        <a href="?" class="btn-bal-ghost"><i class="bi bi-x"></i> Réinitialiser</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if evenements %}
+
+{# Séparer futurs et passés uniquement si on affiche tout (pas de filtre période) #}
+{% if not periode %}
+    {% set evt_futurs = evenements | selectattr('date', 'ge', datetime.utcnow()) | list %}
+    {% set evt_passes = evenements | selectattr('date', 'lt', datetime.utcnow()) | list %}
+{% else %}
+    {% if periode == 'avenir' %}
+        {% set evt_futurs = evenements %}
+        {% set evt_passes = [] %}
+    {% else %}
+        {% set evt_futurs = [] %}
+        {% set evt_passes = evenements %}
+    {% endif %}
+{% endif %}
+
+{% macro carte_evenement(evt) %}
+<div class="bal-card mb-3">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="tache-badge tache-en-cours">{{ evt.type }}</span>
+            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ evt.date.strftime('%d/%m/%Y %H:%M') }}</small>
+            {% if not projet %}
+            <a href="{{ url_for('evenements', projet_id=evt.projet_id) }}" class="text-muted" style="font-size:0.85rem;text-decoration:none;">
+                <i class="bi bi-folder2 me-1"></i>{{ evt.projet.nom }}
+            </a>
+            {% endif %}
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('modifier_evenement', evenement_id=evt.id) }}" class="btn-bal-ghost" style="padding:0.25rem 0.6rem;font-size:0.8rem;"><i class="bi bi-pencil"></i></a>
+            <form method="POST" action="{{ url_for('supprimer_evenement', evenement_id=evt.id) }}"
+                  onsubmit="return confirm('Supprimer cet événement ?')">
+                <button type="submit" class="btn-bal-danger" style="padding:0.25rem 0.6rem;font-size:0.8rem;"><i class="bi bi-trash3"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <p class="mb-2">{{ evt.contenu }}</p>
+
+    {% set pieces_jointes_evt = evt.liens|selectattr('type', 'equalto', 'upload')|list %}
+    {% if pieces_jointes_evt %}
+    <div class="mb-2">
+        <div class="small text-muted mb-1">Fichiers :</div>
+        <div class="d-flex flex-wrap gap-2">
+            {% for f in pieces_jointes_evt %}
+            <div class="d-flex align-items-center gap-1 px-2 py-1 rounded" style="border:1px solid var(--bal-border);font-size:0.85rem;">
+                <i class="bi bi-file-earmark text-muted"></i>
+                <span>{{ f.nom_fichier_upload or f.intitule }}</span>
+                <a href="{{ url_for('servir_fichier', fichier_id=f.id) }}" target="_blank" class="text-muted" title="Visualiser"><i class="bi bi-eye"></i></a>
+                <a href="{{ url_for('servir_fichier', fichier_id=f.id, action='telecharger') }}" class="text-muted" title="Télécharger"><i class="bi bi-download"></i></a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if evt.taches %}
+    <div class="mt-2 pt-2" style="border-top:1px solid var(--bal-border);">
+        <div class="small text-muted mb-1">Tâches :</div>
+        <div class="d-flex flex-wrap gap-2">
+            {% for t in evt.taches %}
+            <span class="d-flex align-items-center gap-1" style="font-size:0.85rem;">
+                <span class="tache-badge tache-{{ t.statut|replace(' ','-')|replace('à','a') }}">{{ t.statut }}</span>
+                {{ t.description|truncate(50) }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-2 text-end">
+        <a href="{{ url_for('evenement_detail', evenement_id=evt.id) }}" class="btn-bal-ghost" style="font-size:0.85rem;">Détails <i class="bi bi-chevron-right"></i></a>
+    </div>
+</div>
+{% endmacro %}
+
+<!-- Section À venir -->
+{% if evt_futurs %}
+<div class="d-flex align-items-center gap-3 mb-3 mt-1">
+    <span style="font-size:0.9rem;font-weight:600;color:var(--bal-accent);white-space:nowrap;">
+        <i class="bi bi-arrow-right-circle-fill me-1"></i>À venir
+    </span>
+    <span style="background:var(--bal-accent-light);color:var(--bal-accent);padding:0.15rem 0.6rem;border-radius:20px;font-size:0.78rem;font-weight:500;">{{ evt_futurs|length }}</span>
+    <div style="flex:1;height:1px;background:var(--bal-border);"></div>
+</div>
+{% for evt in evt_futurs %}
+    {{ carte_evenement(evt) }}
+{% endfor %}
+{% endif %}
+
+<!-- Section Passés -->
+{% if evt_passes %}
+<div class="d-flex align-items-center gap-3 mb-3 mt-4">
+    <span style="font-size:0.9rem;font-weight:600;color:var(--bal-muted);white-space:nowrap;">
+        <i class="bi bi-clock-history me-1"></i>Passés
+    </span>
+    <span style="background:#f0f0f0;color:var(--bal-muted);padding:0.15rem 0.6rem;border-radius:20px;font-size:0.78rem;font-weight:500;">{{ evt_passes|length }}</span>
+    <div style="flex:1;height:1px;background:var(--bal-border);"></div>
+</div>
+{% for evt in evt_passes %}
+    {{ carte_evenement(evt) }}
+{% endfor %}
+{% endif %}
+
+<!-- Pagination -->
+{% if pagination.pages > 1 %}
+<div class="bal-pagination">
+    {% if pagination.has_prev %}
+    <a href="?page={{ pagination.prev_num }}&type={{ type_filtre }}&periode={{ periode }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}"><i class="bi bi-chevron-left"></i></a>
+    {% endif %}
+    {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+            {% if p == pagination.page %}<span class="current">{{ p }}</span>
+            {% else %}<a href="?page={{ p }}&type={{ type_filtre }}&periode={{ periode }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}">{{ p }}</a>{% endif %}
+        {% else %}<span>…</span>{% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+    <a href="?page={{ pagination.next_num }}&type={{ type_filtre }}&periode={{ periode }}&date_debut={{ date_debut }}&date_fin={{ date_fin }}"><i class="bi bi-chevron-right"></i></a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="bal-empty">
+    <i class="bi bi-calendar3"></i>
+    Aucun événement trouvé.
+    {% if projet %}
+    <div class="mt-2"><a href="{{ url_for('ajouter_evenement', projet_id=projet.id) }}" class="btn-bal">Ajouter le premier événement</a></div>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+let calVisibleEvt = false;
+const projetIdCourant = {{ projet.id if projet else 'null' }};
+
+function toggleCalendrierEvt() {
+    calVisibleEvt = !calVisibleEvt;
+    document.getElementById('zone-calendrier-evt').style.display = calVisibleEvt ? 'block' : 'none';
+    document.getElementById('label-cal-toggle-evt').textContent = calVisibleEvt ? 'Vue liste' : 'Vue calendrier';
+    if (calVisibleEvt) {
+        const now = new Date();
+        chargerCalendrierEvt(now.getFullYear(), now.getMonth() + 1);
+    }
+}
+
+function chargerCalendrierEvt(annee, mois) {
+    let url = `/calendrier?annee=${annee}&mois=${mois}`;
+    if (projetIdCourant) {
+        url += `&projet_id=${projetIdCourant}`;
+    }
+    fetch(url)
+        .then(r => r.text())
+        .then(html => { document.getElementById('zone-calendrier-evt').innerHTML = html; });
+}
+
+function chargerCalendrier(annee, mois) {
+    // Appelé par les boutons précédent/suivant générés par le widget partagé
+    chargerCalendrierEvt(annee, mois);
+}
+
+function voirJour(annee, mois, jour) {
+    let url = `/calendrier/jour/${annee}/${mois}/${jour}`;
+    if (projetIdCourant) {
+        url += `?projet_id=${projetIdCourant}`;
+    }
+    fetch(url)
+        .then(r => r.text())
+        .then(html => { document.getElementById('jour-detail').innerHTML = html; });
+}
+</script>
 {% endblock %}

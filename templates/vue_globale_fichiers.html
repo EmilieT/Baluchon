@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Tous les fichiers{% endblock %}
+
+{% block content %}
+<div class="bal-page-header">
+    <h1><i class="bi bi-paperclip me-2"></i>Fichiers</h1>
+    <div class="subtitle">{{ pagination.total }} fichier{% if pagination.total != 1 %}s{% endif %}</div>
+</div>
+
+<div class="bal-filters">
+    <div>
+        <label class="bal-label">Projet</label>
+        <select class="bal-form-control" style="width:auto;" onchange="location.search='?projet_id='+this.value">
+            <option value="0">Tous les projets</option>
+            {% for p in projets %}
+            <option value="{{ p.id }}" {% if projet_id_filtre == p.id %}selected{% endif %}>{{ p.nom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+{% if fichiers %}
+<div class="bal-card">
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr style="border-bottom:2px solid var(--bal-border);font-size:0.82rem;text-transform:uppercase;color:var(--bal-muted);letter-spacing:.04em;">
+                <th style="padding:0.5rem 0.75rem;text-align:left;">Nom</th>
+                <th style="padding:0.5rem 0.75rem;text-align:left;">Projet</th>
+                <th style="padding:0.5rem 0.75rem;text-align:left;">Événement</th>
+                <th style="padding:0.5rem 0.75rem;text-align:left;">Taille</th>
+                <th style="padding:0.5rem 0.75rem;text-align:left;">Ajouté le</th>
+                <th style="padding:0.5rem 0.75rem;"></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for f in fichiers %}
+        <tr style="border-bottom:1px solid var(--bal-border);">
+            <td style="padding:0.6rem 0.75rem;">
+                <div class="d-flex align-items-center gap-1">
+                    <i class="bi bi-file-earmark text-muted"></i>
+                    {{ f.nom_fichier_upload or f.intitule }}
+                </div>
+            </td>
+            <td style="padding:0.6rem 0.75rem;">
+                <a href="{{ url_for('tous_les_fichiers', projet_id=f.projet_id) }}" class="text-muted" style="font-size:0.85rem;text-decoration:none;">
+                    {{ f.projet.nom if f.projet else '—' }}
+                </a>
+            </td>
+            <td style="padding:0.6rem 0.75rem;">
+                {% if f.evenement %}
+                <a href="{{ url_for('evenement_detail', evenement_id=f.evenement_id) }}" class="text-muted" style="font-size:0.85rem;text-decoration:none;">
+                    {{ f.evenement.type }} · {{ f.evenement.date.strftime('%d/%m/%Y') }}
+                </a>
+                {% else %}—{% endif %}
+            </td>
+            <td style="padding:0.6rem 0.75rem;font-size:0.85rem;color:var(--bal-muted);">{{ f.taille|filesizeformat }}</td>
+            <td style="padding:0.6rem 0.75rem;font-size:0.85rem;color:var(--bal-muted);">{{ f.date_creation.strftime('%d/%m/%Y') if f.date_creation else '—' }}</td>
+            <td style="padding:0.6rem 0.75rem;">
+                <div class="d-flex gap-1">
+                    <a href="{{ url_for('servir_fichier', fichier_id=f.id) }}" target="_blank" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;font-size:0.8rem;" title="Visualiser"><i class="bi bi-eye"></i></a>
+                    <a href="{{ url_for('servir_fichier', fichier_id=f.id, action='telecharger') }}" class="btn-bal-ghost" style="padding:0.2rem 0.5rem;font-size:0.8rem;" title="Télécharger"><i class="bi bi-download"></i></a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if pagination.pages > 1 %}
+<div class="bal-pagination">
+    {% if pagination.has_prev %}<a href="?page={{ pagination.prev_num }}&projet_id={{ projet_id_filtre }}"><i class="bi bi-chevron-left"></i></a>{% endif %}
+    {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+            {% if p == pagination.page %}<span class="current">{{ p }}</span>
+            {% else %}<a href="?page={{ p }}&projet_id={{ projet_id_filtre }}">{{ p }}</a>{% endif %}
+        {% else %}<span>…</span>{% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}<a href="?page={{ pagination.next_num }}&projet_id={{ projet_id_filtre }}"><i class="bi bi-chevron-right"></i></a>{% endif %}
+</div>
+{% endif %}
+{% else %}
+<div class="bal-empty">
+    <i class="bi bi-paperclip"></i>
+    Aucun fichier trouvé.
+</div>
+{% endif %}
+{% endblock %}

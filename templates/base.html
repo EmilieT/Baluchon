@@ -1,84 +1,444 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Baluchon - {% block title %}{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baluchon{% block title_suffix %} — {% block title %}{% endblock %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="{{ url_for('static', filename='js/taches.js') }}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        :root {
+            --bal-bg: #f4f6f9;
+            --bal-surface: #ffffff;
+            --bal-border: #e1e6ed;
+            --bal-text: #1f2937;
+            --bal-muted: #64748b;
+            --bal-accent: #2563a8;
+            --bal-accent-light: #e8f0f9;
+            --bal-accent-hover: #1d4e85;
+            --bal-warning: #b07d2a;
+            --bal-danger: #b3433f;
+            --bal-info: #2a5a7c;
+        }
+        * { box-sizing: border-box; }
         body {
-            padding: 0;
-            background-color: #f8f9fa;
+            background-color: var(--bal-bg);
+            color: var(--bal-text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            min-height: 100vh;
         }
-        .header {
-            background-color: #ffffff;
-            padding: 10px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .logo-container {
+
+        /* ── Header ── */
+        .bal-header {
+            background: var(--bal-surface);
+            border-bottom: 1px solid var(--bal-border);
+            padding: 0 1.5rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 10px;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .logo {
-            max-height: 50px;
-            margin-right: 15px;
+        .bal-logo-link {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--bal-text);
+            font-weight: 600;
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
-        .main-title {
+        .bal-logo-link img { height: 28px; }
+        .bal-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-left: 2rem;
+            flex: 1;
+        }
+        .bal-nav a {
+            color: var(--bal-muted);
+            text-decoration: none;
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: background 0.15s, color 0.15s;
+        }
+        .bal-nav a:hover, .bal-nav a.active {
+            background: var(--bal-accent-light);
+            color: var(--bal-accent);
+        }
+
+        /* ── Layout ── */
+        .bal-main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ── Page header ── */
+        .bal-page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .bal-page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
             margin: 0;
-            font-size: 24px;
+            color: var(--bal-text);
+        }
+        .bal-page-header .subtitle {
+            color: var(--bal-muted);
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+
+        /* ── Cards ── */
+        .bal-card {
+            background: var(--bal-surface);
+            border: 1px solid var(--bal-border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .bal-card-header {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--bal-muted);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--bal-border);
+        }
+
+        /* ── Buttons ── */
+        .btn-bal {
+            background: var(--bal-accent);
+            color: #fff;
+            border: none;
+            padding: 0.45rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: background 0.15s;
+        }
+        .btn-bal:hover { background: var(--bal-accent-hover); color: #fff; }
+        .btn-bal-outline {
+            background: transparent;
+            color: var(--bal-accent);
+            border: 1px solid var(--bal-accent);
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: background 0.15s, color 0.15s;
+        }
+        .btn-bal-outline:hover { background: var(--bal-accent-light); color: var(--bal-accent); }
+        .btn-bal-ghost {
+            background: transparent;
+            color: var(--bal-muted);
+            border: 1px solid var(--bal-border);
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: background 0.15s;
+        }
+        .btn-bal-ghost:hover { background: var(--bal-bg); color: var(--bal-text); }
+        .btn-bal-danger {
+            background: var(--bal-danger);
+            color: #fff;
+            border: none;
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: background 0.15s;
+        }
+        .btn-bal-danger:hover { background: #6f2424; color: #fff; }
+
+        /* ── Badges statut projet ── */
+        .statut-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
             font-weight: 500;
         }
-        .logo-link {
+        .statut-en-cours    { background: #e8f0f9; color: #1d4e85; }
+        .statut-en-attente  { background: #fef3e2; color: #8a5f1a; }
+        .statut-archive     { background: #ebebeb; color: #555; }
+        .statut-abandonne   { background: #fdecea; color: #b3433f; }
+
+        /* ── Badges statut tâche ── */
+        .tache-badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 20px; font-size: 0.78rem; font-weight: 500; }
+        .tache-a-faire, .tache-afaire  { background: #f0f0f0; color: #555; }
+        .tache-en-cours { background: #fef3e2; color: #8a5f1a; }
+        .tache-attente, .tache-en-attente  { background: #e3f0fb; color: #1a5276; }
+        .tache-termine, [class*="tache-termin"] { background: #e3f4ea; color: #2d6a3f; }
+
+        /* ── Listes items ── */
+        .bal-list-item {
+            background: var(--bal-surface);
+            border: 1px solid var(--bal-border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.6rem;
+            transition: border-color 0.15s;
+        }
+        .bal-list-item:hover { border-color: #c0bfb5; }
+        .bal-list-item a { color: inherit; text-decoration: none; }
+
+        /* ── Formulaires ── */
+        .bal-form-control {
+            border: 1px solid var(--bal-border);
+            border-radius: 6px;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.9rem;
+            width: 100%;
+            background: var(--bal-surface);
+            color: var(--bal-text);
+            transition: border-color 0.15s;
+        }
+        .bal-form-control:focus {
+            outline: none;
+            border-color: var(--bal-accent);
+            box-shadow: 0 0 0 3px rgba(61,107,79,0.1);
+        }
+        .bal-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--bal-muted);
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+        .bal-form-group { margin-bottom: 1rem; }
+
+        /* ── Filtre bar ── */
+        .bal-filters {
+            background: var(--bal-surface);
+            border: 1px solid var(--bal-border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        /* ── Pagination ── */
+        .bal-pagination {
             display: flex;
             align-items: center;
+            gap: 0.4rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        .bal-pagination a, .bal-pagination span {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            text-decoration: none;
+            color: var(--bal-muted);
+            border: 1px solid var(--bal-border);
+            background: var(--bal-surface);
+        }
+        .bal-pagination a:hover { background: var(--bal-bg); }
+        .bal-pagination .current { background: var(--bal-accent); color: #fff; border-color: var(--bal-accent); }
+
+        /* ── Flash ── */
+        .bal-flash { border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .bal-flash-success { background: #e8f5ec; color: #2d6a3f; border: 1px solid #b7dfbf; }
+        .bal-flash-danger  { background: #fdecea; color: #8b2e2e; border: 1px solid #f0b8b5; }
+        .bal-flash-warning { background: #fef3e2; color: #8a5f1a; border: 1px solid #f5d7a0; }
+        .bal-flash-info    { background: #e3f0fb; color: #1a5276; border: 1px solid #a8d0ee; }
+
+        /* ── Stat cards accueil ── */
+        .stat-card {
+            background: var(--bal-surface);
+            border: 1px solid var(--bal-border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
             text-decoration: none;
             color: inherit;
+            display: block;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .container {
-            padding: 20px;
+        .stat-card:hover { border-color: var(--bal-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.07); color: inherit; }
+        .stat-card .stat-num { font-size: 2rem; font-weight: 700; color: var(--bal-accent); line-height: 1; }
+        .stat-card .stat-label { color: var(--bal-muted); font-size: 0.875rem; margin-top: 0.25rem; }
+
+        /* ── Breadcrumb ── */
+        .bal-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--bal-muted);
+            margin-bottom: 1.25rem;
         }
-        .projet-card {
-            margin-bottom: 20px;
-            border-left: 4px solid #007bff;
-            background-color: #ffffff;
-            padding: 15px;
+        .bal-breadcrumb a { color: var(--bal-muted); text-decoration: none; }
+        .bal-breadcrumb a:hover { color: var(--bal-accent); text-decoration: underline; }
+        .bal-breadcrumb .sep { color: #ccc; }
+
+        /* ── Select statut inline ── */
+        .statut-select.s-a-faire  { background: #f0f0f0; color: #555; border-color: #ccc; }
+        .statut-select.s-en-cours { background: #fef3e2; color: #8a5f1a; border-color: #f5d7a0; }
+        .statut-select.s-attente  { background: #e3f0fb; color: #1a5276; border-color: #a8d0ee; }
+        .statut-select.s-termine  { background: #e8f5ec; color: #2d6a3f; border-color: #b7dfbf; }
+        .statut-select {
+            border: 1px solid var(--bal-border);
             border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            background: var(--bal-surface);
         }
+
+        /* ── Badges priorité (matrice Eisenhower) ── */
+        .priorite-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+        .priorite-urgent_important { background: #fdecea; color: #8b2e2e; }
+        .priorite-important        { background: #e3f0fb; color: #1a5276; }
+        .priorite-urgent           { background: #fef3e2; color: #8a5f1a; }
+        .priorite-a_planifier      { background: #f0f0f0; color: #666; }
+
+        /* ── Indicateur deadline ── */
+        .deadline-flag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 0.1rem 0.5rem;
+            border-radius: 20px;
+        }
+        .deadline-imminente { background: #fef3e2; color: #b07d2a; }
+        .deadline-depassee  { background: #fdecea; color: #8b2e2e; }
+        .bal-list-item.deadline-border-imminente { border-left: 3px solid #d99a3a; }
+        .bal-list-item.deadline-border-depassee  { border-left: 3px solid #b94a4a; }
+
+        /* ── Matrice Eisenhower ── */
+        .matrice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 768px) {
+            .matrice-grid { grid-template-columns: 1fr; }
+        }
+        .matrice-quadrant {
+            background: var(--bal-surface);
+            border: 1px solid var(--bal-border);
+            border-radius: 10px;
+            padding: 1rem;
+            min-height: 200px;
+        }
+        .matrice-quadrant-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid;
+        }
+        .matrice-quadrant.q-urgent_important .matrice-quadrant-header { border-color: #8b2e2e; }
+        .matrice-quadrant.q-important .matrice-quadrant-header { border-color: #1a5276; }
+        .matrice-quadrant.q-urgent .matrice-quadrant-header { border-color: #b07d2a; }
+        .matrice-quadrant.q-a_planifier .matrice-quadrant-header { border-color: #888; }
+
+        /* ── Empty state ── */
+        .bal-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--bal-muted);
+        }
+        .bal-empty i { font-size: 2.5rem; opacity: 0.3; margin-bottom: 0.75rem; display: block; }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="logo-container">
-            <a href="{{ url_for('index') }}" class="logo-link">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Baluchon" class="logo">
-                <h1 class="main-title">Baluchon</h1>
-            </a>
+<header class="bal-header">
+    <a href="{{ url_for('index') }}" class="bal-logo-link">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Baluchon">
+        Baluchon
+    </a>
+    <nav class="bal-nav">
+        <a href="{{ url_for('tous_les_projets') }}" class="{{ 'active' if request.endpoint in ['tous_les_projets','projet_dashboard','editer_projet','ajouter_projet'] }}">
+            <i class="bi bi-folder2"></i> Projets
+        </a>
+        <a href="{{ url_for('tous_les_evenements') }}" class="{{ 'active' if request.endpoint in ['tous_les_evenements','evenements','evenement_detail','ajouter_evenement','modifier_evenement'] }}">
+            <i class="bi bi-calendar3"></i> Événements
+        </a>
+        <a href="{{ url_for('vue_globale_taches') }}" class="{{ 'active' if request.endpoint in ['vue_globale_taches','toutes_les_taches','editer_tache'] }}">
+            <i class="bi bi-check2-square"></i> Tâches
+        </a>
+        <a href="{{ url_for('vue_globale_fichiers') }}" class="{{ 'active' if request.endpoint in ['vue_globale_fichiers','tous_les_fichiers'] }}">
+            <i class="bi bi-paperclip"></i> Fichiers
+        </a>
+        <a href="{{ url_for('stats') }}" class="{{ 'active' if request.endpoint == 'stats' }}">
+            <i class="bi bi-bar-chart"></i> Stats
+        </a>
+    </nav>
+    <a href="{{ url_for('logout') }}" class="text-muted" style="text-decoration:none;font-size:0.85rem;flex-shrink:0;" title="Déconnexion">
+        <i class="bi bi-box-arrow-right"></i>
+    </a>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="max-width:1100px;margin:1rem auto;padding:0 1.5rem;">
+        {% for category, message in messages %}
+        <div class="bal-flash bal-flash-{{ category }}">
+            <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+            {{ message }}
         </div>
-    </header>
-
-<!-- Messages flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="container mt-3">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-
-    <div class="container">
-        {% block content %}{% endblock %}
+        {% endfor %}
     </div>
+    {% endif %}
+{% endwith %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<main class="bal-main">
+    {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/taches.js') }}"></script>
 </body>
 </html>

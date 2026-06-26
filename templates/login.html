@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion — Baluchon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f4f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: #fff;
+            border: 1px solid #e2e0d8;
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 380px;
+        }
+        .login-logo { text-align: center; margin-bottom: 1.5rem; }
+        .login-logo img { height: 48px; }
+        .login-logo h1 { font-size: 1.3rem; font-weight: 600; margin-top: 0.5rem; color: #2c2b27; }
+        .form-control { border: 1px solid #e2e0d8; border-radius: 6px; padding: 0.6rem 0.85rem; }
+        .form-control:focus { border-color: #3d6b4f; box-shadow: 0 0 0 3px rgba(61,107,79,0.1); }
+        .btn-login {
+            background: #3d6b4f; color: #fff; border: none; border-radius: 6px;
+            padding: 0.6rem; width: 100%; font-weight: 500;
+        }
+        .btn-login:hover { background: #2f5340; color: #fff; }
+        .bal-flash { border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.875rem; margin-bottom: 1rem; }
+        .bal-flash-danger { background: #fdecea; color: #8b2e2e; }
+        .bal-flash-info { background: #e3f0fb; color: #1a5276; }
+        .bal-flash-success { background: #e8f5ec; color: #2d6a3f; }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <div class="login-logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Baluchon">
+        <h1>Baluchon</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="bal-flash bal-flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Identifiant</label>
+            <input type="text" class="form-control" name="username" required autofocus>
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Mot de passe</label>
+            <input type="password" class="form-control" name="password" required>
+        </div>
+        <button type="submit" class="btn-login">Se connecter</button>
+    </form>
+</div>
+</body>
+</html>

@@ -2,12 +2,13 @@
 .venv/
 venv/
 
-# Base de données et fichiers sensibles
+# Base de données et données utilisateur
 instance/
 baluchon.db
+*.db
 .env
-uploads/
-migrations/
+uploads/*
+!uploads/.gitkeep
 
 # Cache Python
 __pycache__/
@@ -17,10 +18,7 @@ __pycache__/
 # Fichiers macOS
 .DS_Store
 
-# Fichiers logs et temporaires
+# Logs et temporaires
 *.log
 *.swp
-
-# Fichiers temporaires d'éditeurs
 *~
-

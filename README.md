@@ -1,71 +1,32 @@
-# Baluchon
+# 🎒 Baluchon
 
-**Baluchon** is a Flask application designed to facilitate the management of projects, files, events, and tasks for bioinformatics projects.
+**Baluchon** est une application web (Flask) pour suivre ses projets, événements, tâches, fichiers et informations associées — pensée à l'origine pour des projets de bio-informatique, mais utilisable pour tout suivi de projets.
 
----
+## Fonctionnalités principales
 
-## Main Features
-- Quick project management (add, edit, delete).
-- Visualization of project dependencies within your local desktop environment.
-- Simple tracking of events, tasks, and files associated with each project.
-- Intuitive and responsive interface.
-
----
-
-## Prerequisites
-- Python 3.8 or higher.
-- A virtual environment (recommended).
-- The dependencies listed in `requirements.txt`.
-
----
+- **Projets** avec statut (en cours, en attente, archivé, abandonné), description et raccourcis épinglés (liens web, dossiers, fichiers locaux, fichiers uploadés).
+- **Événements** datés et typés, avec pièces jointes et tâches associées. Vue liste ou calendrier.
+- **Tâches** avec statut, priorité (matrice d'Eisenhower) et date butoir. Vue liste ou matrice.
+- **Infos** : centralisez liens et fichiers utiles à chaque projet, avec vérification des liens.
+- **Statistiques** : diagramme de Gantt et bilan d'activité sur une période (utile pour un bilan annuel).
+- **Connexion sécurisée** par identifiant / mot de passe.
 
 ## Installation
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/EmilieT/baluchon.git
-   cd baluchon
-   ```
-   
-2. Create your virtual environment:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # macOS/Linux
-   ```
-3. Install the dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Initiate your database
-   ```bash
-   mkdir -p instance
-   flask db init
-   flask db migrate -m "Initial migration"
-   flask db upgrade
-   ```   
+Voir le **[GUIDE_INSTALLATION.md](GUIDE_INSTALLATION.md)** pour la procédure pas à pas.
 
----
-## **Launch your local instance of Baluchon**
+En résumé (Mac / Linux) :
 
-1. **Activate the virtual environment** (if not already active):
-   ```bash
-   source venv/bin/activate  # On macOS/Linux
-   ```
-   
-2. **Run the Flask application:**
-   ```bash
-   python app.py
-   ```
-(The application will start and be available at http://127.0.0.1:5000.)
+```bash
+./install.sh   # installe tout et crée votre compte
+./start.sh     # démarre l'application sur http://localhost:8000
+```
 
-**Notes:**
+## Prérequis
 
-- Make sure you are in the project directory (cd path/to/baluchon).
-- If you encounter any errors, check that all dependencies are installed (pip install -r requirements.txt).
-- If you prefer using the flask command, set the FLASK_APP environment variable first:
-   ```bash
-   export FLASK_APP=app.py
-   flask run
-   ```
+- Python 3.8 ou plus
+- macOS ou Linux
 
+## Licence
 
+Voir le fichier `LICENSE`.

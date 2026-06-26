@@ -1,88 +1,79 @@
 {% extends "base.html" %}
-
-{% block title %}Modifier un événement{% endblock %}
+{% block title %}Modifier l'événement{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="my-4">Modifier un événement</h1>
+<div class="bal-breadcrumb">
+    <a href="{{ url_for('index') }}">Accueil</a><span class="sep">/</span>
+    <a href="{{ url_for('projet_dashboard', projet_id=evenement.projet_id) }}">{{ evenement.projet.nom }}</a><span class="sep">/</span>
+    <a href="{{ url_for('evenements', projet_id=evenement.projet_id) }}">Événements</a><span class="sep">/</span>
+    Modifier
+</div>
+<div class="bal-page-header">
+    <h1>Modifier l'événement</h1>
+</div>
 
+<div style="max-width:700px;">
+<div class="bal-card">
     <form method="POST" action="{{ url_for('modifier_evenement', evenement_id=evenement.id) }}">
-        <!-- Champs principaux de l'événement -->
-        <div class="mb-3">
-            <label for="type" class="form-label">Type d'événement</label>
-            <select class="form-select" id="type" name="type" required>
-                <option value="réunion" {% if evenement.type == 'réunion' %}selected{% endif %}>Réunion</option>
-                <option value="message" {% if evenement.type == 'message' %}selected{% endif %}>Message</option>
-                <option value="note" {% if evenement.type == 'note' %}selected{% endif %}>Note</option>
-                <option value="réception" {% if evenement.type == 'réception' %}selected{% endif %}>Réception de données</option>
-                <option value="envoi" {% if evenement.type == 'envoi' %}selected{% endif %}>Envoi de données</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="date" class="form-label">Date et heure</label>
-            <input type="datetime-local" class="form-control" id="date" name="date" value="{{ evenement.date.strftime('%Y-%m-%dT%H:%M') }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="contenu" class="form-label">Contenu</label>
-            <textarea class="form-control" id="contenu" name="contenu" rows="4" required>{{ evenement.contenu }}</textarea>
-        </div>
-
-        <!-- Liste des fichiers existants (sans gestion) -->
-        {% if evenement.fichiers %}
-        <div class="mb-3">
-            <label class="form-label">Fichiers associés</label>
-            <div class="list-group">
-                {% for fichier in evenement.fichiers %}
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="bi bi-file-earmark me-2"></i>
-                        {{ fichier.nom }}
-                    </div>
-                    <div>
-                        <a href="{{ url_for('gerer_fichiers', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
-                            Gérer les fichiers
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="bal-label">Type *</label>
+                <input type="text" class="bal-form-control" name="type" list="types-list" value="{{ evenement.type }}" required>
+                <datalist id="types-list">
+                    <option value="note"><option value="réunion"><option value="communication">
+                    <option value="envoyé"><option value="reçu"><option value="autre">
+                </datalist>
+            </div>
+            <div class="col-md-6">
+                <label class="bal-label">Date et heure *</label>
+                <input type="datetime-local" class="bal-form-control" name="date"
+                       value="{{ evenement.date.strftime('%Y-%m-%dT%H:%M') }}" required>
             </div>
         </div>
-        {% else %}
-        <div class="mb-3">
-            <a href="{{ url_for('gerer_fichiers', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-primary">
-                Ajouter des fichiers
-            </a>
+        <div class="bal-form-group">
+            <label class="bal-label">Contenu *</label>
+            <textarea class="bal-form-control" name="contenu" rows="5" required>{{ evenement.contenu }}</textarea>
         </div>
-        {% endif %}
-        <!-- Section pour ajouter/modifier des tâches -->
-        <div class="mb-3">
-            <label class="form-label">Tâches associées</label>
+
+        <!-- Tâches associées -->
+        <div class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="bal-label mb-0">Tâches associées</label>
+                <button type="button" class="btn-bal-outline" onclick="ajouterLigneTache()" style="font-size:0.82rem;padding:0.25rem 0.7rem;">
+                    <i class="bi bi-plus"></i> Ajouter
+                </button>
+            </div>
             <div id="taches-container">
-                {% for tache in evenement.taches %}
-                <div class="tache-input mb-2 d-flex align-items-center">
-                    <input type="hidden" name="tache_ids[]" value="{{ tache.id }}">
-                    <input type="text" class="form-control me-2 flex-grow-1" name="taches[]" value="{{ tache.description }}" placeholder="Description de la tâche" required>
-                    <input type="date" class="form-control me-2" name="date_limite[]" value="{% if tache.date_limite %}{{ tache.date_limite.strftime('%Y-%m-%d') }}{% endif %}" placeholder="Date limite">
-                    <select class="form-select me-2" name="statuts[]">
-                        <option value="à faire" {% if tache.statut == 'à faire' %}selected{% endif %}>À faire</option>
-                        <option value="en cours" {% if tache.statut == 'en cours' %}selected{% endif %}>En cours</option>
-                        <option value="terminé" {% if tache.statut == 'terminé' %}selected{% endif %}>Terminé</option>
-                    </select>
-                    <button type="button" class="btn btn-sm btn-outline-danger remove-tache">×</button>
+                {% for t in evenement.taches %}
+                <div class="d-flex gap-2 mb-2 align-items-center">
+                    <input type="text" class="bal-form-control" name="taches[]" value="{{ t.description }}" style="flex:1;">
+                    <input type="date" class="bal-form-control" name="date_limite[]"
+                           value="{{ t.date_limite.strftime('%Y-%m-%d') if t.date_limite else '' }}" style="width:150px;">
+                    <button type="button" onclick="this.parentElement.remove()" class="btn-bal-danger" style="padding:0.3rem 0.6rem;flex-shrink:0;"><i class="bi bi-x"></i></button>
                 </div>
                 {% endfor %}
             </div>
-            <button type="button" id="ajouter-tache" class="btn btn-sm btn-outline-secondary mt-2">+ Ajouter une tâche</button>
         </div>
 
-
-        <div class="d-flex justify-content-between mt-4">
-            <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}" class="btn btn-sm btn-outline-secondary">Annuler</a>
-            <button type="submit" class="btn btn-sm btn-primary">Enregistrer les modifications</button>
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn-bal"><i class="bi bi-check-lg"></i> Enregistrer</button>
+            <a href="{{ url_for('evenement_detail', evenement_id=evenement.id) }}" class="btn-bal-ghost">Annuler</a>
         </div>
     </form>
-
 </div>
+</div>
+
+<script>
+function ajouterLigneTache() {
+    const container = document.getElementById('taches-container');
+    const div = document.createElement('div');
+    div.className = 'd-flex gap-2 mb-2 align-items-center';
+    div.innerHTML = `
+        <input type="text" class="bal-form-control" name="taches[]" placeholder="Description…" style="flex:1;">
+        <input type="date" class="bal-form-control" name="date_limite[]" style="width:150px;">
+        <button type="button" onclick="this.parentElement.remove()" class="btn-bal-danger" style="padding:0.3rem 0.6rem;flex-shrink:0;"><i class="bi bi-x"></i></button>
+    `;
+    container.appendChild(div);
+}
+</script>
 {% endblock %}

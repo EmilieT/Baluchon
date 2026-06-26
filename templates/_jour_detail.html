@@ -1,0 +1,16 @@
+<div class="p-2 rounded" style="background:var(--bal-bg);">
+    <div class="small fw-semibold mb-1">{{ date_jour.strftime('%d/%m/%Y') }}</div>
+    {% if evenements %}
+    {% for evt in evenements %}
+    <a href="{{ url_for('evenement_detail', evenement_id=evt.id) }}" style="text-decoration:none;color:inherit;">
+    <div class="d-flex align-items-center gap-2 mb-1" style="font-size:0.82rem;">
+        <span class="tache-badge tache-en-cours" style="font-size:0.7rem;">{{ evt.type }}</span>
+        <span>{{ evt.date.strftime('%H:%M') }}</span>
+        <span class="text-muted">{{ evt.projet.nom }}</span>
+    </div>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div class="text-muted small">Aucun événement ce jour-là.</div>
+    {% endif %}
+</div>
