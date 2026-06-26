@@ -11,6 +11,11 @@
 - **Statistiques** : diagramme de Gantt et bilan d'activité sur une période (utile pour un bilan annuel).
 - **Connexion sécurisée** par identifiant / mot de passe.
 
+## Documentation
+
+- **[GUIDE_INSTALLATION.md](GUIDE_INSTALLATION.md)** — installer et démarrer l'application, pas à pas.
+- **[GUIDE_FONCTIONNALITES.md](GUIDE_FONCTIONNALITES.md)** — comment utiliser Baluchon au quotidien.
+
 ## Installation
 
 Voir le **[GUIDE_INSTALLATION.md](GUIDE_INSTALLATION.md)** pour la procédure pas à pas.
